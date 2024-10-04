@@ -13,8 +13,8 @@ Welcome to the LYRICA-Music Streaming Platform! This project allows users to str
 
 ## Technology Stack
 
-- _Front-End_: HTML, CSS, JavaScript (with optional frameworks like React or Vue.js)
-- _Back-End_: Python (Flask or Django)
+- _Front-End_: HTML, CSS, JavaScript
+- _Back-End_: Python (Django)
 - _Database_: PostgreSQL
 
 ## Installation
