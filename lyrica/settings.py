@@ -74,12 +74,26 @@ WSGI_APPLICATION = 'lyrica.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+# settings.py
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'Lyrica',  # the name of your database
+        'USER': 'postgres',     # your PostgreSQL username
+        'PASSWORD': 'anu1311', # your PostgreSQL password
+        'HOST': 'localhost',         # or your PostgreSQL server IP
+        'PORT': '5432',              # default PostgreSQL port
     }
 }
+
 
 
 # Password validation

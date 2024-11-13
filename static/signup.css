@@ -1,0 +1,107 @@
+/* General styling for body */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #e0e5ec;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background: linear-gradient(135deg, #e0e5ec, #f9f9f9);
+}
+
+/* Container for the auth box */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+/* Neomorphic Auth Box */
+.auth-box {
+  background: #e0e5ec;
+  border-radius: 15px;
+  padding: 40px;
+  box-shadow: 8px 8px 15px #a3b1c6, -8px -8px 15px #ffffff;
+  width: 300px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.auth-box:hover {
+  box-shadow: 12px 12px 25px #a3b1c6, -12px -12px 25px #ffffff;
+}
+
+/* Title of the form */
+h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Styling for form fields */
+form .input-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+form label {
+  font-size: 14px;
+  color: #555;
+  display: block;
+}
+
+form input[type="text"], form input[type="password"], form input[type="email"] {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #e0e5ec;
+  box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+  font-size: 16px;
+  color: #333;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+form input:focus {
+  box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff, 0 0 0 3px rgba(50, 115, 220, 0.6);
+}
+
+/* Submit Button */
+form button[type="submit"] {
+  width: 100%;
+  padding: 10px;
+  background-color: #4e73df;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 3px 3px 8px #a3b1c6, -3px -3px 8px #ffffff;
+  transition: all 0.3s ease;
+}
+
+form button[type="submit"]:hover {
+  box-shadow: 5px 5px 15px #a3b1c6, -5px -5px 15px #ffffff;
+}
+
+/* Link to login page */
+.login-link {
+  margin-top: 20px;
+}
+
+.login-link p {
+  font-size: 14px;
+}
+
+.login-link a {
+  color: #4e73df;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
