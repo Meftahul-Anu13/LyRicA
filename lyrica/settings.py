@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -88,11 +89,12 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Lyrica',
         'USER': 'postgres',
-        'PASSWORD': 'nabila',  # Check this password
+        'PASSWORD': 'anu1311',  # Check this password
         'HOST': '127.0.0.1',  # Or 'localhost'
         'PORT': '5432',
     }
 }
+
 
 
 
@@ -145,8 +147,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # lyrica/settings.py
 
 # pCloud Storage settings
-PCLOUD_API_BASE_URL = 'https://api.pcloud.com'
-PCLOUD_USERNAME = 'teamsosiut21@gmail.com'  # Replace with your pCloud username
-PCLOUD_APP_PASSWORD = 'sosteam21'  # Replace with your pCloud application password
-PCLOUD_SONG_FOLDER = '/My Music'  # The pCloud path where songs are stored
+# Load environment variables from the .env file
+load_dotenv()
+PCLOUD_USERNAME = os.getenv('PCLOUD_USERNAME')
+PCLOUD_PASSWORD = os.getenv('PCLOUD_PASSWORD')
+PCLOUD_MUSIC_FOLDER = os.getenv('PCLOUD_MUSIC_FOLDER')
+
 
