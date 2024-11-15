@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from .forms import SignupForm
 
+
 # Signup view
 def signup_view(request):
     if request.method == 'POST':
