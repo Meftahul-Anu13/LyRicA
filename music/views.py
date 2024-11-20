@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse, HttpResponse
 from .forms import SignupForm
 from dotenv import load_dotenv
-
+from .models import Song
 # Load environment variables
 load_dotenv()
 
@@ -81,30 +81,77 @@ def list_folder_contents(auth_token, folder_path):
     )
     return response.json()
 
-# Fetch song list from pCloud
+# # Fetch song list from pCloud
+# def song_list(request):
+#     try:
+#         auth_token = authenticate_pcloud()
+#         folder_contents = list_folder_contents(auth_token, PCLOUD_MUSIC_FOLDER)
+#         songs = [
+#             {"name": item["name"], "path": item["path"]}
+#             for item in folder_contents.get("metadata", {}).get("contents", [])
+#             if not item["isfolder"]
+#         ]
+#         print(songs)
+#         return render(request, "song_list.html", {"songs": songs})
+#     except Exception as e:
+#         return HttpResponse(f"Error: {str(e)}", status=500)
+
+# # Stream song from pCloud
+# def play_song(request):
+#     auth_token = authenticate_pcloud()
+#     file_path = request.GET.get('file_path')  # Song file path
+#     response = requests.post(
+#         'https://api.pcloud.com/getfilelink',
+#         data={'auth': auth_token, 'path': file_path}
+#     )
+#     if response.status_code == 200:
+#         file_link = f"https://{response.json()['hosts'][0]}{response.json()['path']}"
+#         print(file_link)
+#         return JsonResponse({"url": file_link})
+#     else:
+#         return HttpResponse("Error fetching song.", status=400)
+
 def song_list(request):
     try:
+        # Fetch songs from the database
+        db_songs = Song.objects.all().values('title', 'file_url')
+        
+        # Fetch songs from pCloud
         auth_token = authenticate_pcloud()
         folder_contents = list_folder_contents(auth_token, PCLOUD_MUSIC_FOLDER)
-        songs = [
+        pcloud_songs = [
             {"name": item["name"], "path": item["path"]}
             for item in folder_contents.get("metadata", {}).get("contents", [])
             if not item["isfolder"]
         ]
+
+        # Combine database and pCloud songs
+        songs = []
+        for song in db_songs:
+            title_with_extension = f"{song['title']}.mp3"
+            matching_pcloud_song = next(
+                (psong for psong in pcloud_songs if psong['name'] == title_with_extension),
+                None
+            )
+            if matching_pcloud_song:
+                songs.append({"name": song["title"], "path": matching_pcloud_song["path"]})
+
         return render(request, "song_list.html", {"songs": songs})
     except Exception as e:
         return HttpResponse(f"Error: {str(e)}", status=500)
 
-# Stream song from pCloud
 def play_song(request):
-    auth_token = authenticate_pcloud()
-    file_path = request.GET.get('file_path')  # Song file path
-    response = requests.post(
-        'https://api.pcloud.com/getfilelink',
-        data={'auth': auth_token, 'path': file_path}
-    )
-    if response.status_code == 200:
-        file_link = f"https://{response.json()['hosts'][0]}{response.json()['path']}"
-        return JsonResponse({"url": file_link})
-    else:
-        return HttpResponse("Error fetching song.", status=400)
+    try:
+        auth_token = authenticate_pcloud()
+        file_path = request.GET.get('file_path')  # Song file path
+        response = requests.post(
+            'https://api.pcloud.com/getfilelink',
+            data={'auth': auth_token, 'path': file_path}
+        )
+        if response.status_code == 200:
+            file_link = f"https://{response.json()['hosts'][0]}{response.json()['path']}"
+            return JsonResponse({"url": file_link})
+        else:
+            return HttpResponse("Error fetching song.", status=400)
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}", status=500)
