@@ -59,6 +59,22 @@ def login_view(request):
 # Index view (Home page)
 def index(request):
     return render(request, 'song_list.html')  # Assuming index.html is the homepage of your app
+# Search view   
+def search(request):
+    query = request.GET.get('q', '')  # Get the query from the request
+    songs = Song.objects.filter(Q(title__icontains=query) | Q(artist__name__icontains=query) | Q(genre__name__icontains=query))
+    artists = Artist.objects.filter(name__icontains=query)
+    albums = Album.objects.filter(title__icontains=query)
+    playlists = Playlist.objects.filter(name__icontains=query)
+    
+    context = {
+        'query': query,
+        'songs': songs,
+        'artists': artists,
+        'albums': albums,
+        'playlists': playlists,
+    }
+    return render(request, 'music/search_results.html', context)    
 
 
 # Authenticate with pCloud
