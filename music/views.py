@@ -140,6 +140,41 @@ def song_list(request):
     except Exception as e:
         return HttpResponse(f"Error: {str(e)}", status=500)
 
+# Search view   
+def search(request):
+    query = request.GET.get('q', '').strip()  # Get and clean the query
+    if query:  # Only perform the search if a query is provided
+        search_vector = (
+            SearchVector('title', weight='A') +
+            SearchVector('artist__name', weight='B') +
+            SearchVector('genre__name', weight='C')
+        )
+        search_query = SearchQuery(query)
+
+        # Search songs with ranking
+        songs = (
+            Song.objects.annotate(rank=SearchRank(search_vector, search_query))
+            .filter(rank__gte=0.1)  # Filter by relevance
+            .order_by('-rank')
+        )
+
+        # Search artists, albums, and playlists (simplified search for these models)
+        artists = Artist.objects.annotate(search=SearchVector('name')).filter(search=search_query)
+        albums = Album.objects.annotate(search=SearchVector('title')).filter(search=search_query)
+        playlists = Playlist.objects.annotate(search=SearchVector('name')).filter(search=search_query)
+    else:
+        # Empty query, return empty lists
+        songs, artists, albums, playlists = [], [], [], []
+
+    context = {
+        'query': query,
+        'songs': songs,
+        'artists': artists,
+        'albums': albums,
+        'playlists': playlists,
+    }
+    return render(request, 'music/search_results.html', context)          
+
 def play_song(request):
     try:
         auth_token = authenticate_pcloud()
