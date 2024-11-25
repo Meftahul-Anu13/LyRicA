@@ -1,0 +1,147 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ song.title }} - Now Playing</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <style>
+        /* Same styles for audio player and page layout */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Arial", sans-serif;
+        }
+
+        body {
+            color: #333;
+            background: #4e73df;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #song-container {
+            background: #e0e5ec;
+            border-radius: 15px;
+            box-shadow: 8px 8px 20px #a3b1c6, -8px -8px 20px #ffffff;
+            padding: 30px;
+            text-align: center;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #333;
+            text-shadow: 1px 1px 2px #a3b1c6;
+        }
+
+        p {
+            font-size: 18px;
+            color: #555;
+        }
+
+        #audio-controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background: #4e73df;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #3b5ab1;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="song-container">
+        <h1>{{ song.title }}</h1>
+        <p>{{ song.artist }}</p>
+        <button onclick="playSong({{ forloop.counter0 }})">Play</button>
+        
+        <audio id="audio-player" controls>
+            <source src="{{ song.path }}" type="audio/mp3">
+        </audio>
+
+        <div id="audio-controls">
+            <button onclick="prevSong()">Previous</button>
+            <button onclick="nextSong()">Next</button>
+            <button onclick="shuffleSongs()">Shuffle</button>
+        </div>
+    </div>
+
+    <script>
+        const songs = [
+            {% for song in songs %}
+            { name: "{{ song.title }}", path: "{{ song.path }}" },
+            {% endfor %}
+        ];
+
+        let currentIndex = {{ song_index }};
+        const audioPlayer = document.getElementById('audio-player');
+
+        function playSong(index) {
+            // Get the song data based on the clicked index
+            const song = songs[index];
+            
+            // Send a request to fetch the file URL from pCloud using the file path
+            fetch(`/play_song?file_path=${encodeURIComponent(song.path)}`)
+                .then(response => response.json())  // Expecting a JSON response with the URL
+                .then(data => {
+                    if (data.url) {
+                        // Set the audio player source to the fetched URL
+                        const audioPlayer = document.getElementById('audio-player');
+                        audioPlayer.src = data.url;  // Set the new song URL
+                        audioPlayer.play();  // Play the song
+                    } else {
+                        alert("Failed to fetch song URL.");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching the song:', error);
+                    alert("Failed to fetch the song.");
+                });
+        }
+        
+        
+
+        function prevSong() {
+            currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+            playSong(currentIndex);
+        }
+
+        function nextSong() {
+            currentIndex = (currentIndex + 1) % songs.length;
+            playSong(currentIndex);
+        }
+
+        function shuffleSongs() {
+            currentIndex = Math.floor(Math.random() * songs.length);
+            playSong(currentIndex);
+        }
+
+        audioPlayer.addEventListener('ended', () => nextSong());
+    </script>
+</body>
+</html>

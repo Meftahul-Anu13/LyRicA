@@ -1,17 +1,259 @@
 {% load static %}
-
+<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="{% static 'style.css' %}">
-    
-</head>
-<body>
-    <p>UI Part</p>
-    <div class="body">
-        LYRICAAA !!!
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music Streaming Service</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+    <style>
+      /* Reset and global styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
+      }
+
+      body {
+        color: #333;
+        background: #4e73df;
+        /* Updated background color */
+        display: flex;
+        /* Horizontal layout for sidebar and content */
+        height: 100vh;
+        overflow: hidden;
+        /* Prevent scrollbars on body */
+      }
+
+      /* Sidebar Styles */
+      .sidebar {
+        background: #ffffff;
+        width: 240px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        border-radius: 15px;
+        box-shadow: 8px 8px 20px #a3b1c6, -8px -8px 20px #ffffff;
+        /* Soft neomorphic shadow */
+        height: 100vh;
+        position: fixed;
+        /* Fixed sidebar */
+        top: 0;
+        left: 0;
+      }
+
+      .sidebar a {
+        text-decoration: none;
+        color: #555;
+        margin: 12px 0;
+        padding: 10px;
+        border-radius: 10px;
+        background: #e0e5ec;
+        box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+        transition: all 0.3s ease;
+      }
+
+      .sidebar a:hover {
+        background: #f0f0f0;
+        box-shadow: inset 5px 5px 15px #a3b1c6, inset -5px -5px 15px #ffffff,
+          0 0 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .sidebar a.active {
+        background-color: #d1d9e6;
+        /* Active item highlighting */
+      }
+
+      .sidebar .logo-container img {
+        width: 100%;
+        height: auto;
+        margin-bottom: 30px;
+      }
+
+      .sidebar-section {
+        margin-bottom: 10px;
+      }
+
+      /* Main Content Wrapper */
+      .main-wrapper {
+        display: flex;
+        flex-direction: column;
+        /* Stack content vertically */
+        margin-left: 260px;
+        /* Leave space for the fixed sidebar */
+        width: calc(100% - 260px);
+        /* Adjust width to fill remaining space */
+        overflow-y: auto;
+        /* Enable scrolling */
+        padding: 20px;
+        /* Padding around content */
+        background: #4e73df;
+        /* Match body background for seamless design */
+      }
+
+      /* Content Styles */
+      .content {
+        /* Adjust to fit next to the sidebar */
+        width: 100%;
+        /* Ensure it doesn't overlap the sidebar */
+        margin-bottom: 20px;
+        /* Spacing between sections */
+        overflow-y: auto;
+        background: #0e0142;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 8px 8px 20px #a3b1c6, -8px -8px 20px #ffffff;
+        display: flex;
+        /* Ensure child elements (like search-bar) align properly */
+        /* Center align the search-bar vertically */
+      }
+
+      .main-content {
+        width: 100%;
+        overflow-y: auto;
+        background: #0e0142;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 8px 8px 20px #a3b1c6, -8px -8px 20px #ffffff;
+        color: #fff;
+        /* Set text color to white */
+        text-decoration: none;
+      }
+
+      /* Search Bar */
+      .search-bar {
+        width: 100%;
+        /* Make it responsive to the content container */
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 5px;
+        /* Corrected padding */
+        box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+        display: flex;
+        /* Align search input and button horizontally */
+        align-items: center;
+      }
+
+      .search-bar input[type="search"] {
+        width: 100%;
+        /* Fill the available space */
+        border: none;
+        padding: 10px;
+        font-size: 16px;
+        outline: none;
+        color: #000;
+        /* Set input text color to black */
+      }
+
+      .search-bar button {
+        border: none;
+        background: none;
+        color: #333;
+        cursor: pointer;
+        font-size: 18px;
+        margin-left: 10px;
+        /* Add spacing between input and button */
+      }
+
+      .browse-all {
+        display: flex;
+        overflow-x: auto;
+        /* Enable horizontal scrolling */
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      <!-- Spotify Logo -->
+      <div class="logo-container">
+        <img
+          src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Green.png"
+          alt="Spotify Logo"
+        />
+      </div>
+
+      <!-- Welcome User -->
+      <div class="sidebar-section">
+        <b>👤 Welcome, {{ user.username }}</b>
+        <a href="{% url 'signup2' %}">↪️ Logout</a>
+      </div>
+
+      <!-- Navigation Links -->
+      <div class="sidebar-section">
+        <a href="{% url 'index' %}">🏠 Home</a>
+        <a href="{% url 'song_list' %}">🔍 Search</a>
+        <a href="#">🎵 Your Library</a>
+        <a href="#">💜 Liked Songs</a>
+      </div>
+
+      <!-- Playlist Links -->
+      <div class="sidebar-section">
+        <a href="#">🎶 Experience</a>
+        <a href="#">👤 Ayra Starr</a>
+        <!-- Add more playlist links -->
+      </div>
     </div>
-</body>
+
+    <div class="main-wrapper">
+      <div class="content">
+        <div class="search-bar">
+          <input
+            type="search"
+            placeholder="Search for songs, artists, or albums"
+          />
+          <button>🔍</button>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <h1>Discover New Music</h1>
+        <p>
+          Explore curated playlists, top charts, and personalized
+          recommendations.
+        </p>
+        <div class="playlist-section">
+          <h2>Trending Playlists</h2>
+          <div class="playlist-grid">
+            <div class="playlist-card">
+              <img src="static/images/image.png" alt="Playlist Cover" />
+              <p>Top Hits 2024</p>
+            </div>
+            <div class="playlist-card">
+              <img src="static/images/image.png" alt="Playlist Cover" />
+              <p>Chill Vibes</p>
+            </div>
+            <div class="playlist-card">
+              <img src="static/images/image.png" alt="Playlist Cover" />
+              <p>Workout Beats</p>
+            </div>
+            <div class="playlist-card">
+              <img src="static/images/image.png" alt="Playlist Cover" />
+              <p>Party Anthems</p>
+            </div>
+          </div>
+        </div>
+        <div class="browse-all-title">Browse all</div>
+
+        <!-- "Browse All" Section Content -->
+
+        <div class="browse-all">
+          {% for song in songs %}
+          <div class="category-card" data-index="{{ forloop.counter0 }}"  onclick="window.location.href='{% url 'song_detail' song_index=forloop.counter0 %}'" >
+            <img src="static/images/image.png" alt="{{ song.title }}" />
+            <div class="category-title"><p>{{ song.title }}</p></div>
+            <div class="category-title"><p>{{ song.artist }}</p></div>
+           
+          </div>
+          {% empty %}
+          <p>No songs available.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    
+
+  </body>
 </html>

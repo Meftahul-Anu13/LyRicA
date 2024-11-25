@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Song List</title>
+    <style>
+        /* General body styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0e5ec;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #e0e5ec, #f9f9f9);
+        }
+
+        h1 {
+            color: #333;
+            text-shadow: 1px 1px 2px #a3b1c6;
+        }
+
+        /* Styling for the search bar */
+        #search-bar {
+            width: 100%;
+            max-width: 600px;
+            padding: 10px 15px;
+            margin: 20px 0;
+            border: 2px solid #4e73df;
+            border-radius: 25px;
+            background: #e0e5ec;
+            box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+            font-size: 16px;
+            outline: none;
+        }
+
+        /* Neomorphic styling for song container */
+        #song-container {
+            width: 100%;
+            max-width: 600px;
+            background: #e0e5ec;
+            border-radius: 15px;
+            box-shadow: 8px 8px 15px #a3b1c6, -8px -8px 15px #ffffff;
+            padding: 20px;
+            text-align: center;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .song:hover {
+            transform: scale(1.02);
+            box-shadow: 5px 5px 15px #a3b1c6, -5px -5px 15px #ffffff;
+        }
+
+        .song {
+            background: #e0e5ec;
+            border: 2px solid #4e73df;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff;
+            transition: transform 0.1s ease;
+        }
+
+        .song p {
+            font-size: 18px;
+            color: #333;
+            margin: 0;
+        }
+
+        .song button {
+            background: #e0e5ec;
+            border: 2px solid #4e73df;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #333;
+            border-radius: 50px;
+            box-shadow: 5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .song button:hover {
+            box-shadow: 5px 5px 15px #a3b1c6, -5px -5px 15px #ffffff;
+            color: #4e73df;
+        }
+
+        /* Sticky footer for audio controls */
+        #audio-controls {
+            width: 100%;
+            max-width: 600px;
+            position: sticky;
+            bottom: 0;
+            background: #e0e5ec;
+            border-radius: 15px;
+            box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        #audio-controls button {
+            background: #e0e5ec;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #333;
+            border-radius: 50px;
+            box-shadow: 5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        #audio-controls button:hover {
+            box-shadow: 5px 5px 15px #a3b1c6, -5px -5px 15px #ffffff;
+            color: #4e73df;
+        }
+
+        #audio-player {
+            flex: 1;
+            margin: 0 10px;
+            outline: none;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Song List</h1>
+    <input
+        type="text"
+        id="search-bar"
+        placeholder="Search songs..."
+        oninput="filterSongs()"
+    />
+    <div id="song-container">
+        {% for song in songs %}
+        <div class="song" data-index="{{ forloop.counter0 }}">
+            <p class="song-name">{{ song.name }}</p>
+            <button onclick="playSong({{ forloop.counter0 }})">Play</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div id="audio-controls">
+        <button onclick="prevSong()">Previous</button>
+        <audio id="audio-player" controls></audio>
+        <button onclick="nextSong()">Next</button>
+        <button onclick="shuffleSongs()">Shuffle</button>
+    </div>
+
+    <script>
+        const songs = [
+            {% for song in songs %}
+            { name: "{{ song.name }}", path: "{{ song.path }}" },
+            {% endfor %}
+        ];
+        let currentIndex = 0;
+
+        const audioPlayer = document.getElementById('audio-player');
+        const songContainer = document.getElementById('song-container');
+        const searchBar = document.getElementById('search-bar');
+
+        function playSong(index) {
+            const visibleSongs = Array.from(songContainer.querySelectorAll('.song'))
+                .filter(songDiv => songDiv.style.display !== "none");
+
+            const selectedSongIndex = visibleSongs[index].getAttribute("data-index");
+            currentIndex = parseInt(selectedSongIndex);
+
+            fetch(`/play_song?file_path=${encodeURIComponent(songs[currentIndex].path)}`)
+                .then(response => response.json())
+                .then(data => {
+                    audioPlayer.src = data.url;
+                    audioPlayer.play();
+                })
+                .catch(() => alert("Failed to fetch the song."));
+        }
+
+        function prevSong() {
+            currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+            playSong(currentIndex);
+        }
+
+        function nextSong() {
+            currentIndex = (currentIndex + 1) % songs.length;
+            playSong(currentIndex);
+        }
+
+        function shuffleSongs() {
+            currentIndex = Math.floor(Math.random() * songs.length);
+            playSong(currentIndex);
+        }
+
+        function filterSongs() {
+            const query = searchBar.value.toLowerCase();
+            const songDivs = songContainer.querySelectorAll('.song');
+            songDivs.forEach(songDiv => {
+                const songName = songDiv.querySelector('.song-name').textContent.toLowerCase();
+                songDiv.style.display = songName.includes(query) ? "block" : "none";
+            });
+        }
+
+        audioPlayer.addEventListener('ended', () => nextSong());
+    </script>
+</body>
+</html>

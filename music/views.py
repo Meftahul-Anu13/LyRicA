@@ -5,10 +5,11 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse,Http404
 from .forms import SignupForm
 from dotenv import load_dotenv
-from .models import Song
+from .models import Song,Artist
+
 # Load environment variables
 load_dotenv()
 
@@ -31,7 +32,7 @@ def signup_view(request):
     else:
         form = SignupForm()
     
-    return render(request, 'signup.html', {'form': form})
+    return render(request, 'signup2.html', {'form': form})
 
 
 # Login view
@@ -46,7 +47,7 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, "You have successfully logged in!")
-                return redirect('song_list')  # Redirect to the home page after login
+                return redirect('index')  # Redirect to the home page after login
             else:
                 messages.error(request, "Invalid credentials. Please try again.")
         else:
@@ -54,11 +55,11 @@ def login_view(request):
     else:
         form = AuthenticationForm()
 
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'login2.html', {'form': form})
 
 # Index view (Home page)
 def index(request):
-    return render(request, 'song_list.html')  # Assuming index.html is the homepage of your app
+    return render(request, 'index.html')  # Assuming index.html is the homepage of your app
 
 
 # Authenticate with pCloud
@@ -113,9 +114,9 @@ def list_folder_contents(auth_token, folder_path):
 
 def song_list(request):
     try:
-        # Fetch songs from the database
-        db_songs = Song.objects.all().values('title', 'file_url')
-        
+        # Fetch songs from the database, including the artist's name
+        db_songs = Song.objects.all().select_related('artist').values('title', 'file_url', 'artist__name')
+
         # Fetch songs from pCloud
         auth_token = authenticate_pcloud()
         folder_contents = list_folder_contents(auth_token, PCLOUD_MUSIC_FOLDER)
@@ -134,11 +135,23 @@ def song_list(request):
                 None
             )
             if matching_pcloud_song:
-                songs.append({"name": song["title"], "path": matching_pcloud_song["path"]})
+                songs.append({
+                    "title": song['title'],
+                    "file_url": matching_pcloud_song['path'],
+                    "artist": song['artist__name']  # Get artist's name directly
+                })
+            else:
+                songs.append({
+                    "title": song['title'],
+                    "file_url": song['file_url'],  # In case no pCloud match
+                    "artist": song['artist__name']
+                })
 
-        return render(request, "song_list.html", {"songs": songs})
+        return render(request, "index.html", {"songs": songs})
+
     except Exception as e:
         return HttpResponse(f"Error: {str(e)}", status=500)
+
 
 # Search view   
 def search(request):
@@ -190,3 +203,13 @@ def play_song(request):
             return HttpResponse("Error fetching song.", status=400)
     except Exception as e:
         return HttpResponse(f"Error: {str(e)}", status=500)
+def song_detail(request, song_index):
+    songs = Song.objects.all()
+    song = songs[song_index]  # Assuming `Song` is your model and `song_index` is passed
+    return render(request, 'song_detail.html', {
+        'songs': songs,
+        'song': song,
+        'song_index': song_index
+    })
+    
+    

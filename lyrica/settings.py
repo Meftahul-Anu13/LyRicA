@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'music',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -49,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'lyrica.urls'
@@ -89,11 +91,18 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Lyrica',
         'USER': 'postgres',
-        'PASSWORD': 'khanmahi100',  # Check this password
-        'HOST': '127.0.0.1',  # Or 'localhost'
+        'PASSWORD': 'anu1311',  # Check this password
+        # 'HOST': '127.0.0.1',  # Or 'localhost'
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Replace with the actual origin of your frontend
+    "http://127.0.0.1:3000",
+]
+CORS_ALLOW_ALL_ORIGINS = True
+
 
 
 
