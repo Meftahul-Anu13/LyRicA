@@ -1,0 +1,21 @@
+{% extends 'index2.html' %}
+
+{% block title %}My Favorites{% endblock %}
+
+{% block music_list %}
+    <div class="favorites">
+        {% for favorite in favorites %}
+        <div class="track" data-index="{{ forloop.counter0 }}">
+            <img src="{% static 'images/image.png' %}" alt="{{ favorite.song.title }}" class="album-art" />
+            <div class="track-info">
+                <p class="track-title">{{ favorite.song.title }}</p>
+                <p class="track-artist">{{ favorite.artist.name }}</p>
+                <!-- Uncomment the line below if the album information is available -->
+                <!-- <p class="track-album">{{ favorite.album.title }}</p> -->
+            </div>
+        </div>
+        {% empty %}
+        <p>No favorite songs yet!</p>
+        {% endfor %}
+    </div>
+{% endblock %}

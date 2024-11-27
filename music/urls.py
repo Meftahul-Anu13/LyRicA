@@ -13,4 +13,6 @@ urlpatterns = [
     path('song/<int:song_index>/', views.song_detail, name='song_detail'),
     path("play_song/", views.play_song, name="play_song"),
     path('search/', views.search, name='search'),
+    path('add-to-favorites/<int:song_id>/', views.add_to_favorites, name='add_to_favorites'),
+    path('my_music/', views.my_music, name='my_music'),
 ]

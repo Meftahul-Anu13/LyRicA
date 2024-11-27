@@ -6,9 +6,15 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.http import JsonResponse, HttpResponse,Http404
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from .forms import SignupForm
+from django.views.decorators.csrf import csrf_exempt    
 from dotenv import load_dotenv
-from .models import Song,Artist
+from django.contrib.auth.decorators import login_required
+from .models import Song,Artist,Favorites, Playlist, User,UserType
+from .forms import LoginForm
+from django.contrib.auth.hashers import check_password 
 
 # Load environment variables
 load_dotenv()
@@ -23,43 +29,45 @@ def signup_view(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
         if form.is_valid():
-            user = form.save()  # This saves the user to the database
-            login(request, user)  # Log the user in after successful signup
-            messages.success(request, "Your account has been created and you are now logged in!")
-            return redirect('song_list')  # Redirect to home page
+            form.save()
+            messages.success(request, "Your account has been created successfully!")
+            return redirect('login')
         else:
-            messages.error(request, "Signup failed. Please correct the errors below.")
+            messages.error(request, "Signup failed. Please fix the errors below.")
     else:
         form = SignupForm()
-    
-    return render(request, 'signup2.html', {'form': form})
 
+    user_types = UserType.objects.all()  # Fetch all user types for dropdown
+    return render(request, 'signup2.html', {'form': form, 'user_types': user_types})
 
 # Login view
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        form = LoginForm(request.POST)
         if form.is_valid():
-            # Authenticate and log the user in
-            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                messages.success(request, "You have successfully logged in!")
-                return redirect('index')  # Redirect to the home page after login
-            else:
-                messages.error(request, "Invalid credentials. Please try again.")
+
+            try:
+                user = User.objects.get(email=email)
+                if check_password(password, user.password):  # Verify hashed password
+                    login(request, user)  # Log the user in
+                    messages.success(request, "You have successfully logged in!")
+                    return redirect('index')  # Redirect to a success page
+                else:
+                    messages.error(request, "Invalid email or password.")
+            except User.DoesNotExist:
+                messages.error(request, "User with this email does not exist.")
         else:
-            messages.error(request, "Invalid form submission. Please correct the errors.")
+            messages.error(request, "Invalid form submission.")
     else:
-        form = AuthenticationForm()
+        form = LoginForm()
 
     return render(request, 'login2.html', {'form': form})
 
 # Index view (Home page)
 def index(request):
-    return render(request, 'index.html')  # Assuming index.html is the homepage of your app
+    return render(request, 'index2.html')  # Assuming index.html is the homepage of your app
 
 
 # Authenticate with pCloud
@@ -82,40 +90,10 @@ def list_folder_contents(auth_token, folder_path):
     )
     return response.json()
 
-# # Fetch song list from pCloud
-# def song_list(request):
-#     try:
-#         auth_token = authenticate_pcloud()
-#         folder_contents = list_folder_contents(auth_token, PCLOUD_MUSIC_FOLDER)
-#         songs = [
-#             {"name": item["name"], "path": item["path"]}
-#             for item in folder_contents.get("metadata", {}).get("contents", [])
-#             if not item["isfolder"]
-#         ]
-#         print(songs)
-#         return render(request, "song_list.html", {"songs": songs})
-#     except Exception as e:
-#         return HttpResponse(f"Error: {str(e)}", status=500)
-
-# # Stream song from pCloud
-# def play_song(request):
-#     auth_token = authenticate_pcloud()
-#     file_path = request.GET.get('file_path')  # Song file path
-#     response = requests.post(
-#         'https://api.pcloud.com/getfilelink',
-#         data={'auth': auth_token, 'path': file_path}
-#     )
-#     if response.status_code == 200:
-#         file_link = f"https://{response.json()['hosts'][0]}{response.json()['path']}"
-#         print(file_link)
-#         return JsonResponse({"url": file_link})
-#     else:
-#         return HttpResponse("Error fetching song.", status=400)
-
 def song_list(request):
     try:
         # Fetch songs from the database, including the artist's name
-        db_songs = Song.objects.all().select_related('artist').values('title', 'file_url', 'artist__name')
+        db_songs = Song.objects.all().select_related('artist').values('title', 'file_url', 'artist__name','id')
 
         # Fetch songs from pCloud
         auth_token = authenticate_pcloud()
@@ -138,16 +116,18 @@ def song_list(request):
                 songs.append({
                     "title": song['title'],
                     "file_url": matching_pcloud_song['path'],
-                    "artist": song['artist__name']  # Get artist's name directly
+                    "artist": song['artist__name'], # Get artist's name directly
+                    "id": song['id']
                 })
             else:
                 songs.append({
                     "title": song['title'],
                     "file_url": song['file_url'],  # In case no pCloud match
-                    "artist": song['artist__name']
+                    "artist": song['artist__name'],
+                    "id": song['id']
                 })
 
-        return render(request, "index.html", {"songs": songs})
+        return render(request, "index2.html", {"songs": songs})
 
     except Exception as e:
         return HttpResponse(f"Error: {str(e)}", status=500)
@@ -213,3 +193,30 @@ def song_detail(request, song_index):
     })
     
     
+# write code for add to fav and then when i click on the my_music.html then show it in my_music.html !
+@login_required
+def add_to_favorites(request, song_id):
+    if request.method == 'POST':
+        try:
+            user = request.user
+            song = Song.objects.get(id=song_id)
+            favorite = Favorites.objects.create(
+                user=user,
+                song=song,
+                album=song.album,
+                artist=song.artist
+            )
+            favorite.save()
+            return JsonResponse({'message': 'Song added to favorites!'})
+        except Song.DoesNotExist:
+            return JsonResponse({'error': 'Song does not exist.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method.'}, status=400)
+@login_required
+def my_music(request):
+    user = request.user
+    favorites = Favorites.objects.filter(user=user).select_related('song', 'album', 'artist')
+    return render(request, 'my_music.html', {'favorites': favorites})
+
