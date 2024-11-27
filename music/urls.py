@@ -15,4 +15,5 @@ urlpatterns = [
     path('search/', views.search, name='search'),
     path('add-to-favorites/<int:song_id>/', views.add_to_favorites, name='add_to_favorites'),
     path('my_music/', views.my_music, name='my_music'),
+    path('remove-from-favorites/<int:song_id>/', views.remove_from_favorites, name='remove_from_favorites'),
 ]

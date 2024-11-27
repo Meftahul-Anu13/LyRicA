@@ -214,6 +214,20 @@ def add_to_favorites(request, song_id):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
+# write code for removing fav from favoroites songs when it will be clikced
+@login_required
+def remove_from_favorites(request, song_id):
+    if request.method == 'POST':
+        try:
+            favorite = Favorites.objects.get(user=request.user, song__id=song_id)
+            favorite.delete()
+            return JsonResponse({'message': 'Song removed from favorites!'})
+        except Favorites.DoesNotExist:
+            return JsonResponse({'error': 'Favorite not found.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method.'}, status=400)
 @login_required
 def my_music(request):
     user = request.user
