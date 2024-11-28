@@ -1,15 +1,102 @@
-<div class="favorites">
-  {% for favorite in favorites %}
-  <div class="track" data-index="{{ forloop.counter0 }}">
-      <img src="{% static 'images/image.png' %}" alt="{{ favorite.song.title }}" class="album-art" />
-      <div class="track-info">
-          <p class="track-title">{{ favorite.song.title }}</p>
-          <p class="track-artist">{{ favorite.artist.name }}</p>
-          <!-- Uncomment the line below if the album information is available -->
-          <!-- <p class="track-album">{{ favorite.album.title }}</p> -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music Streaming Service</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+    <style>
+      
+    </style>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      
+      <div class="logo-container">
+        
       </div>
-  </div>
-  {% empty %}
-  <p>No favorite songs yet!</p>
-  {% endfor %}
-</div>
+
+      <!-- Welcome User -->
+      <div class="sidebar-section">
+        <b>👤 Welcome, {{ user.username }}</b>
+        <a href="{% url 'signup2' %}">↪️ Logout</a>
+      </div>
+
+      <!-- Navigation Links -->
+      <div class="sidebar-section">
+        <a href="{% url 'index' %}">🏠 Home</a>
+        <a href="{% url 'song_list' %}">🔍 Search</a>
+        <a href="#">🎵 Your Library</a>
+        <a href="#">💜 Liked Songs</a>
+      </div>
+
+      <!-- Playlist Links -->
+      <div class="sidebar-section">
+        <a href="#">🎶 Experience</a>
+        <a href="#">👤 Ayra Starr</a>
+        <!-- Add more playlist links -->
+      </div>
+    </div>
+
+    <div class="main-wrapper">
+      <div class="content">
+        <div class="search-bar">
+          <input
+            type="search"
+            placeholder="Search for songs, artists, or albums"
+          />
+          <button>🔍</button>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <h1>Discover New Music</h1>
+        <p>
+          Explore curated playlists, top charts, and personalized
+          recommendations.
+        </p>
+        <div class="playlist-section">
+          <h2>Trending Playlists</h2>
+          <div class="playlist-grid">
+            <div class="playlist-card">
+              <img src="static/images/image.png" alt="Playlist Cover" />
+              <p>Top Hits 2024</p>
+            </div>
+            <div class="playlist-card">
+              <img src="static/images/image.png" alt="Playlist Cover" />
+              <p>Chill Vibes</p>
+            </div>
+            <div class="playlist-card">
+              <img src="static/images/image.png" alt="Playlist Cover" />
+              <p>Workout Beats</p>
+            </div>
+            <div class="playlist-card">
+              <img src="static/images/image.png" alt="Playlist Cover" />
+              <p>Party Anthems</p>
+            </div>
+          </div>
+        </div>
+        <div class="browse-all-title">Browse all</div>
+
+        <!-- "Browse All" Section Content -->
+
+        <div class="browse-all">
+          {% for song in songs %}
+          <div class="category-card" data-index="{{ forloop.counter0 }}"  onclick="window.location.href='{% url 'song_detail' song_index=forloop.counter0 %}'" >
+            <img src="static/images/image.png" alt="{{ song.title }}" />
+            <div class="category-title"><p>{{ song.title }}</p></div>
+            <div class="category-title"><p>{{ song.artist }}</p></div>
+           
+          </div>
+          {% empty %}
+          <p>No songs available.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    
+
+  </body>
+</html>

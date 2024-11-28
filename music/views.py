@@ -167,22 +167,37 @@ def search(request):
         'playlists': playlists,
     }
     return render(request, 'music/search_results.html', context)          
-
-def play_song(request):
+# use this play_song to play the clcking song in the now playing songs part 
+def play_song(request, song_title):
     try:
+        # Authenticate with pCloud
         auth_token = authenticate_pcloud()
-        file_path = request.GET.get('file_path')  # Song file path
-        response = requests.post(
-            'https://api.pcloud.com/getfilelink',
-            data={'auth': auth_token, 'path': file_path}
+
+        # Fetch the file path for the given song title
+        folder_contents = list_folder_contents(auth_token, PCLOUD_MUSIC_FOLDER)
+        matching_song = next(
+            (item for item in folder_contents.get("metadata", {}).get("contents", [])
+             if not item["isfolder"] and item["name"] == f"{song_title}.mp3"),
+            None
         )
-        if response.status_code == 200:
-            file_link = f"https://{response.json()['hosts'][0]}{response.json()['path']}"
-            return JsonResponse({"url": file_link})
+
+        if matching_song:
+            file_path = matching_song["path"]
+            # Fetch the direct file link
+            response = requests.post(
+                'https://api.pcloud.com/getfilelink',
+                data={'auth': auth_token, 'path': file_path}
+            )
+            if response.status_code == 200:
+                file_link = f"https://{response.json()['hosts'][0]}{response.json()['path']}"
+                return JsonResponse({"url": file_link})
+            else:
+                return HttpResponse("Error fetching song link.", status=400)
         else:
-            return HttpResponse("Error fetching song.", status=400)
+            return JsonResponse({"error": "Song not found in pCloud folder."}, status=404)
     except Exception as e:
-        return HttpResponse(f"Error: {str(e)}", status=500)
+        return JsonResponse({"error": str(e)}, status=500)
+
 def song_detail(request, song_index):
     songs = Song.objects.all()
     song = songs[song_index]  # Assuming `Song` is your model and `song_index` is passed
@@ -193,7 +208,7 @@ def song_detail(request, song_index):
     })
     
     
-# write code for add to fav and then when i click on the my_music.html then show it in my_music.html !
+
 @login_required
 def add_to_favorites(request, song_id):
     if request.method == 'POST':
@@ -214,7 +229,7 @@ def add_to_favorites(request, song_id):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
-# write code for removing fav from favoroites songs when it will be clikced
+
 @login_required
 def remove_from_favorites(request, song_id):
     if request.method == 'POST':

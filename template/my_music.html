@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mytone Music Player</title>
+    <title>Lyrica Music Player</title>
     <link rel="stylesheet" href="{% static 'styles.css' %}" />
 </head>
 
@@ -14,7 +14,7 @@
     <div class="container">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="logo">Mytone</div>
+            <div class="logo">Lyrica</div>
             <nav class="menu">
                 <ul>
                     <li class="{% if request.path == '/index/' %}active{% endif %}"><a
@@ -56,25 +56,24 @@
 
             <!-- Music List -->
             <section class="music-list">
-                {% block music_list %}
-              
-                    {% for favorite in favorites %}
-                    <div class="track" data-index="{{ forloop.counter0 }}">
-                        <img src="{% static 'images/image.png' %}" alt="{{ favorite.song.title }}" class="album-art" />
-                        <div class="track-info">
-                            <p class="track-title">{{ favorite.song.title }}</p>
-                            <p class="track-artist">{{ favorite.artist.name }}</p>
-                            <!-- <p class="track-artist">{{favorite.song.id}}</p> -->
-                            <!-- write button for remove fav -->
-                        </div>
-                        <button class="remove-from-favorites" data-song-id="{{ favorite.song.id }}">
-                            Remove ❤️ 
-                        </button>
+                {% block music_list_fav %}
+                {% for favorite in favorites %}
+                <div class="track" data-index="{{ forloop.counter0 }}">
+                    <img src="{% static 'images/image.png' %}" alt="{{ favorite.song.title }}" class="album-art" />
+                    <div class="track-info"
+                        onclick="playSong('{{ favorite.song.title }}', '{{ favorite.artist.name }}')">
+                        <p class="track-title">{{ favorite.song.title }}</p>
+                        <p class="track-artist">{{ favorite.artist.name }}</p>
+
                     </div>
-                    {% empty %}
-                    <p>No favorite songs yet!</p>
-                    {% endfor %}
-           
+                    <button class="remove-from-favorites" data-song-id="{{ favorite.song.id }}">
+                        Remove ❤️
+                    </button>
+                </div>
+                {% empty %}
+                <p>No favorite songs yet!</p>
+                {% endfor %}
+
                 {% endblock %}
             </section>
         </main>
@@ -102,22 +101,22 @@
                 <div class="track-details" id="now-playing-details">
                     <p>No song is currently playing.</p>
                 </div>
-                <div class="progress" id="progress-bar" style="display: none;">
-                    <span id="current-time">0:00</span>
-                    <input type="range" min="0" max="100" value="0" id="progress-range" />
-                    <span id="song-duration">3:00</span>
-                </div>
-                <div class="controls" id="controls" style="display: none;">
+                <audio id="audio-player" controls style="width: 100%; display: none;">
+                    Your browser does not support the audio element.
+                </audio>
+                <!-- <div class="progress" id="progress-bar" style="display: none;">
+                    <!-- here add music play bar and with as audio play  -->
+
+            </div> -->
+            <!-- <div class="controls" id="controls" style="display: none;">
                     <button id="prev-btn">⏮</button>
                     <button id="play-pause-btn">⏸</button>
                     <button id="next-btn">⏭</button>
-                </div>
-            </div>
-        </aside>
+                </div> -->
+    </div>
+    </aside>
     </div>
 
-    <!-- JavaScript Section -->
-    <!-- <script src="{% static 'js/scripts.js' %}"></script> -->
 </body>
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 <script>
@@ -151,6 +150,34 @@
                 });
         });
     });
+
+    function playSong(songTitle, artistName) {
+        const nowPlayingDetails = document.getElementById("now-playing-details");
+        const audioPlayer = document.getElementById("audio-player");
+
+        // Send a request to the backend to fetch the file link
+        fetch(`/play-song/${encodeURIComponent(songTitle)}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.url) {
+                    // Update the "Now Playing" section
+                    nowPlayingDetails.innerHTML = `
+                        <p><strong>${songTitle}</strong> by ${artistName}</p>
+                    `;
+
+                    // Update the audio player's source and play the song
+                    audioPlayer.src = data.url;
+                    audioPlayer.style.display = "block"; // Show the audio player
+                    audioPlayer.play(); // Start playing
+                } else {
+                    alert(data.error || "Could not fetch the song.");
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching song:", error);
+                alert("An error occurred while trying to play the song.");
+            });
+    }
 </script>
 
 </html>

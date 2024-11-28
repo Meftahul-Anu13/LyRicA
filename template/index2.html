@@ -5,14 +5,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mytone Music Player</title>
+    <title>Lyrica Music Player</title>
     <link rel="stylesheet" href="{% static 'styles.css' %}" />
   </head>
   <body>
     <div class="container">
       <!-- Sidebar -->
       <aside class="sidebar">
-        <div class="logo">Mytone</div>
+        <div class="logo">Lyrica</div>
         <nav class="menu">
           <ul>
             <li class="{% if request.path == '/index/' %}active{% endif %}"><a href="{% url 'index' %}">Discover</a></li>
@@ -24,6 +24,9 @@
           <p>LIBRARY</p>
           <ul>
             <li class="{% if request.path == '/my_music/' %}active{% endif %}"><a href="{% url 'my_music' %}">My Music</a></li>
+            {% block my_music_fav %}
+
+            {% endblock %}
             <li><a href="#">Albums</a></li>
             <li><a href="#">Artists</a></li>
           </ul>
@@ -51,26 +54,26 @@
         <!-- Music List -->
         <section class="music-list">
           {% block music_list %}
-            {% for song in songs %}
-              <div class="track" data-index="{{ forloop.counter0 }}" onclick="playSong({{ forloop.counter0 }})">
-                <img src="{% static 'images/image.png' %}" alt="{{ song.title }}" class="album-art" />
-                <div class="track-info">
-                  <p class="track-title">{{ song.title }}</p>
-                  <p class="track-artist">{{ song.artist }}</p>
-                  <p class="track-artist">{{ song.id }}</p>
-                  
-                </div>
-                <!-- <span class="track-duration">{{ song.duration|default:"3:00" }}</span> -->
-               
-       
-                <button class="add-to-favorites" data-song-id="{{ song.id }}"> add ❤️
-                    <!-- <p>{{ song.id }}</p> -->
-                </button>
-                
-              </div>
-            {% empty %}
-              <p>No songs available.</p>
-            {% endfor %}
+          {% for song in songs %}
+          <div class="track" data-index="{{ forloop.counter0 }}" onclick="playSong({{ forloop.counter0 }})">
+            <img src="{% static 'images/image.png' %}" alt="{{ song.title }}" class="album-art" />
+            <div class="track-info" onclick="playSong('{{ song.title }}', '{{ song.artist }}')">
+              <p class="track-title">{{ song.title }}</p>
+              <p class="track-artist">{{ song.artist }}</p>
+              <p class="track-artist">{{ song.id }}</p>
+              
+            </div>
+            <!-- <span class="track-duration">{{ song.duration|default:"3:00" }}</span> -->
+           
+   
+            <button class="add-to-favorites" data-song-id="{{ song.id }}"> add ❤️
+                <!-- <p>{{ song.id }}</p> -->
+            </button>
+            
+          </div>
+        {% empty %}
+          <p>No songs available.</p>
+        {% endfor %}
           {% endblock %}
         </section>
       </main>
@@ -99,10 +102,14 @@
             <p>No song is currently playing.</p>
           </div>
           <div class="progress" id="progress-bar" style="display: none;">
-            <span id="current-time">0:00</span>
+            <!-- <span id="current-time">0:00</span>
             <input type="range" min="0" max="100" value="0" id="progress-range" />
-            <span id="song-duration">3:00</span>
+            <span id="song-duration">3:00</span> -->
+
           </div>
+          <audio id="audio-player" controls style="width: 100%; display: none;">
+            Your browser does not support the audio element.
+         </audio>
           <div class="controls" id="controls" style="display: none;">
             <button id="prev-btn">⏮</button>
             <button id="play-pause-btn">⏸</button>
@@ -138,7 +145,7 @@
                     this.disabled = true;
                     // Revert button back to 'Add' after 5 seconds
                     setTimeout(() => {
-                        this.textContent = 'Add';
+                        this.textContent = 'Added ❤️ ';
                         this.disabled = false;
                     }, 5000); // 5 seconds timeout
                 } else if (data.error) {
@@ -150,6 +157,33 @@
             });
         });
     });
+    function playSong(songTitle, artistName) {
+        const nowPlayingDetails = document.getElementById("now-playing-details");
+        const audioPlayer = document.getElementById("audio-player");
+
+        // Send a request to the backend to fetch the file link
+        fetch(`/play-song/${encodeURIComponent(songTitle)}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.url) {
+                    // Update the "Now Playing" section
+                    nowPlayingDetails.innerHTML = `
+                        <p><strong>${songTitle}</strong> by ${artistName}</p>
+                    `;
+
+                    // Update the audio player's source and play the song
+                    audioPlayer.src = data.url;
+                    audioPlayer.style.display = "block"; // Show the audio player
+                    audioPlayer.play(); // Start playing
+                } else {
+                    alert(data.error || "Could not fetch the song.");
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching song:", error);
+                alert("An error occurred while trying to play the song.");
+            });
+    }
     
 </script>
 </html>
