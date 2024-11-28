@@ -44,7 +44,7 @@
       <!-- Main Content -->
       <main class="main-content">
         <header>
-          <h1>{% block title %}Discover Music{% endblock %}</h1>
+          <h1>{% block title %}Albums {% endblock %}</h1>
           <div class="controls">
             <button class="play">Play</button>
             <button class="shuffle">Shuffle</button>
@@ -52,25 +52,29 @@
         </header>
 
         <!-- Music List -->
-        <section class="music-list">
-          {% block music_list %}
-          {% for song in songs %}
-          <div class="track" data-index="{{ forloop.counter0 }}" onclick="playSong({{ forloop.counter0 }})">
-            <img src="{% static 'images/image.png' %}" alt="{{ song.title }}" class="album-art" />
-            <div class="track-info" onclick="playSong('{{ song.title }}', '{{ song.artist }}')">
-              <p class="track-title">{{ song.title }}</p>
-              <p class="track-artist">{{ song.artist }}</p>
-              <p class="track-artist">{{ song.id }}</p>
-              
-            </div>
-            <button class="add-to-favorites" data-song-id="{{ song.id }}"> add ❤️
-                <!-- <p>{{ song.id }}</p> -->
-            </button>           
-          </div>
+        <section class="albums-list">
+          <!-- Album List -->
+    <div class="albums-list">
+        {% for album in albums %}
+        <div class="album-item" onclick="showAlbumSongs({{ album.id }}, '{{ album.title }}')">
+          <p>{{ album.title }}</p>
+        </div>
         {% empty %}
-          <p>No songs available.</p>
+        <p>No albums found.</p>
         {% endfor %}
-          {% endblock %}
+      </div>
+  
+      <!-- Songs List -->
+      <div class="songs-list" id="songs-list" style="display: none;">
+        <h2 id="album-title">Songs</h2>
+        <ul id="song-items"></ul>
+      </div>
+  
+      <!-- Audio Player -->
+      <audio id="audio-player" controls style="width: 100%; display: none;">
+        Your browser does not support the audio element.
+      </audio>
+  
         </section>
       </main>
 
@@ -98,6 +102,9 @@
             <p>No song is currently playing.</p>
           </div>
           <div class="progress" id="progress-bar" style="display: none;">
+            <!-- <span id="current-time">0:00</span>
+            <input type="range" min="0" max="100" value="0" id="progress-range" />
+            <span id="song-duration">3:00</span> -->
 
           </div>
           <audio id="audio-player" controls style="width: 100%; display: none;">
@@ -112,67 +119,64 @@
       </aside>
     </div>
 
+    <!-- JavaScript Section -->
+    <!-- <script src="{% static 'js/scripts.js' %}"></script> -->
   </body>
   <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
   <script>
-    document.querySelectorAll('.add-to-favorites').forEach(button => {
-        button.addEventListener('click', function () {
-            const songId = this.dataset.songId;
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    
-            fetch(`/add-to-favorites/${songId}/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    alert(data.message);
-                    // Optional: Update button state
-                    this.textContent = '❤️ Added';
-                    this.disabled = true;
-                    // Revert button back to 'Add' after 5 seconds
-                    setTimeout(() => {
-                        this.textContent = 'Added ❤️';
-                        this.disabled = false;
-                    }, 5000); // 5 seconds timeout
-                } else if (data.error) {
-                    alert(data.error);
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
-        });
-    });
-    function playSong(songTitle, artistName) {
-        const nowPlayingDetails = document.getElementById("now-playing-details");
+    function showAlbumSongs(albumId, albumTitle) {
+        // Hide the audio player if visible
         const audioPlayer = document.getElementById("audio-player");
-        // Send a request to the backend to fetch the file link
+        audioPlayer.style.display = "none";
+        audioPlayer.pause();
+  
+        // Fetch songs for the selected album
+        fetch(`/get-album-songs/${albumId}/`)
+          .then(response => response.json())
+          .then(data => {
+            const songListContainer = document.getElementById("songs-list");
+            const songItems = document.getElementById("song-items");
+            songItems.innerHTML = ""; // Clear previous songs
+            if (data.songs && data.songs.length > 0) {
+              // Display album title
+              document.getElementById("album-title").textContent = `Songs in ${albumTitle}`;
+              // Populate the list with songs
+              data.songs.forEach(song => {
+                const songItem = document.createElement("li");
+                songItem.textContent = song.title;
+                songItem.className = "song-item";
+                songItem.onclick = () => playSong(song.title);
+                songItems.appendChild(songItem);
+              });
+              songListContainer.style.display = "block"; // Show the song list
+            } else {
+              alert("No songs found in this album.");
+            }
+          })
+          .catch(error => {
+            console.error("Error fetching album songs:", error);
+            alert("An error occurred while fetching songs.");
+          });
+      }
+  
+      function playSong(songTitle) {
+        // Play the selected song
         fetch(`/play-song/${encodeURIComponent(songTitle)}/`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.url) {
-                    // Update the "Now Playing" section
-                    nowPlayingDetails.innerHTML = `
-                        <p><strong>${songTitle}</strong> by ${artistName}</p>
-                    `;
-
-                    // Update the audio player's source and play the song
-                    audioPlayer.src = data.url;
-                    audioPlayer.style.display = "block"; // Show the audio player
-                    audioPlayer.play(); // Start playing
-                } else {
-                    alert(data.error || "Could not fetch the song.");
-                }
-            })
-            .catch(error => {
-                console.error("Error fetching song:", error);
-                alert("An error occurred while trying to play the song.");
-            });
-    }    
+          .then(response => response.json())
+          .then(data => {
+            if (data.url) {
+              const audioPlayer = document.getElementById("audio-player");
+              audioPlayer.src = data.url; // Set the song URL
+              audioPlayer.style.display = "block"; // Show the audio player
+              audioPlayer.play(); // Start playback
+            } else {
+              alert(data.error || "Could not fetch the song.");
+            }
+          })
+          .catch(error => {
+            console.error("Error playing song:", error);
+          });
+      }
+    
 </script>
 </html>

@@ -290,3 +290,66 @@ header {
 }
 
 
+.albums-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.album-item {
+  padding: 10px 15px;
+  background-color: #e3e3e3;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.album-item:hover {
+  background-color: #d1d1d1;
+}
+
+.songs-dropdown {
+  margin-top: 20px;
+}
+
+#album-name {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+  color: #555;
+}
+
+#song-select {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+#song-select:hover {
+  border-color: #888;
+}
+
+#song-select option {
+  padding: 10px;
+  font-size: 1rem;
+}
+
+audio {
+  margin-top: 20px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+  }
+
+  h1, h2 {
+    font-size: 1.5rem;
+  }
+}
+

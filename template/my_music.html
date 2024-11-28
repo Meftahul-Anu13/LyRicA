@@ -30,8 +30,8 @@
                 <ul>
                     <li class="{% if request.path == '/my_music/' %}active{% endif %}"><a href="{% url 'my_music' %}">My
                             Music</a></li>
-                    <li><a href="#">Albums</a></li>
-                    <li><a href="#">Artists</a></li>
+                    <li><a href="{% url 'album' %}">Albums</a></li>
+                    <li><a href="{% url 'artists' %}">Artists</a></li>
                 </ul>
             </div>
             <div class="playlist">
@@ -73,7 +73,6 @@
                 {% empty %}
                 <p>No favorite songs yet!</p>
                 {% endfor %}
-
                 {% endblock %}
             </section>
         </main>
@@ -103,16 +102,8 @@
                 </div>
                 <audio id="audio-player" controls style="width: 100%; display: none;">
                     Your browser does not support the audio element.
-                </audio>
-                <!-- <div class="progress" id="progress-bar" style="display: none;">
-                    <!-- here add music play bar and with as audio play  -->
-
-            </div> -->
-            <!-- <div class="controls" id="controls" style="display: none;">
-                    <button id="prev-btn">⏮</button>
-                    <button id="play-pause-btn">⏸</button>
-                    <button id="next-btn">⏭</button>
-                </div> -->
+                </audio>             
+            </div>            
     </div>
     </aside>
     </div>

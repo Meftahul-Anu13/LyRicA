@@ -12,7 +12,7 @@ from .forms import SignupForm
 from django.views.decorators.csrf import csrf_exempt    
 from dotenv import load_dotenv
 from django.contrib.auth.decorators import login_required
-from .models import Song,Artist,Favorites, Playlist, User,UserType
+from .models import Song,Artist,Favorites, Playlist, User,UserType,Album
 from .forms import LoginForm
 from django.contrib.auth.hashers import check_password 
 
@@ -251,8 +251,6 @@ def my_music(request):
 
 def show_artists(request):
     artists = Artist.objects.all()
-    # write code to see all the artists songs when i will click on the aritst and if i click on the song then 
-    # it will play the song
     return render(request, 'artists.html', {'artists': artists})
 def get_artist_songs(request, artist_id):
     try:
@@ -261,4 +259,18 @@ def get_artist_songs(request, artist_id):
         return JsonResponse({"songs": list(songs)})
     except Artist.DoesNotExist:
         return JsonResponse({"error": "Artist not found."}, status=404)
+    
+def show_album(request):
+    albums = Album.objects.all()
+    return render(request, 'album.html', {'albums': albums})
+# when the album will be clicked then  it will show the songs including it in another dev using 
+# dropdown and then the song can be played ! write html code for this
+def get_album_songs(request, album_id):
+    try:
+        album = Album.objects.get(id=album_id)
+        songs = Song.objects.filter(album=album).values("title")
+        return JsonResponse({"songs": list(songs)})
+    except Album.DoesNotExist:
+        return JsonResponse({"error": "Album not found."}, status=404)
+    
 

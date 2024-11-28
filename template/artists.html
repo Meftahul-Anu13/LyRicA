@@ -54,25 +54,25 @@
 
         <!-- Music List -->
         <section class="artists-list">
-            <div class="artists-list">
-                {% for artist in artists %}
-                <div class="artist-item" onclick="showArtistSongs({{ artist.id }}, '{{ artist.name }}')">
-                  <p>{{ artist.name }}</p>
-                </div>
-                {% empty %}
-                <p>No artists found.</p>
-                {% endfor %}
-              </div>
-          
-              <div class="songs-list" id="songs-list" style="display: none;">
-                <h2 id="artist-name">Songs</h2>
-                <ul id="song-items"></ul>
-              </div>
-          
-              <audio id="audio-player" controls style="width: 100%; display: none;">
-                Your browser does not support the audio element.
-              </audio>
+          <div class="artists-list">
+            {% for artist in artists %}
+            <div class="artist-item" onclick="showArtistSongs({{ artist.id }}, '{{ artist.name }}')">
+              <p>{{ artist.name }}</p>
             </div>
+            {% empty %}
+            <p>No artists found.</p>
+            {% endfor %}
+          </div>
+      
+          <div class="songs-list" id="songs-list" style="display: none;">
+            <h2 id="artist-name">Songs</h2>
+            <ul id="song-items"></ul>
+          </div>
+      
+          <audio id="audio-player" controls style="width: 100%; display: none;">
+            Your browser does not support the audio element.
+          </audio>
+        </div>         
         </section>
       </main>
 
@@ -123,57 +123,57 @@
   <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
   <script>
     function showArtistSongs(artistId, artistName) {
-        // Hide and reset the audio player
-        const audioPlayer = document.getElementById("audio-player");
-        audioPlayer.pause(); // Stop any ongoing playback
-        audioPlayer.style.display = "none"; // Hide the audio player
-        audioPlayer.src = ""; // Clear the audio source
-      
-        // Fetch songs for the selected artist from the backend
-        fetch(`/get-artist-songs/${artistId}/`)
-          .then(response => response.json())
-          .then(data => {
-            if (data.songs && data.songs.length > 0) {
-              // Display the artist name and song list
-              document.getElementById("artist-name").textContent = `Songs by ${artistName}`;
-              const songsList = document.getElementById("song-items");
-              songsList.innerHTML = ""; // Clear existing songs
-              data.songs.forEach(song => {
-                const songItem = document.createElement("li");
-                songItem.textContent = song.title;
-                songItem.onclick = () => playSong(song.title);
-                songsList.appendChild(songItem);
-              });
-              document.getElementById("songs-list").style.display = "block";
-            } else {
-              alert("No songs found for this artist.");
-            }
-          })
-          .catch(error => {
-            console.error("Error fetching artist songs:", error);
-          });
-      }
-      
-
-    function playSong(songTitle) {
-      // Play the selected song
-      fetch(`/play-song/${encodeURIComponent(songTitle)}/`)
+      // Hide and reset the audio player
+      const audioPlayer = document.getElementById("audio-player");
+      audioPlayer.pause(); // Stop any ongoing playback
+      audioPlayer.style.display = "none"; // Hide the audio player
+      audioPlayer.src = ""; // Clear the audio source
+    
+      // Fetch songs for the selected artist from the backend
+      fetch(`/get-artist-songs/${artistId}/`)
         .then(response => response.json())
         .then(data => {
-          if (data.url) {
-            const audioPlayer = document.getElementById("audio-player");
-            audioPlayer.src = data.url;
-            audioPlayer.style.display = "block";
-            audioPlayer.play();
+          if (data.songs && data.songs.length > 0) {
+            // Display the artist name and song list
+            document.getElementById("artist-name").textContent = `Songs by ${artistName}`;
+            const songsList = document.getElementById("song-items");
+            songsList.innerHTML = ""; // Clear existing songs
+            data.songs.forEach(song => {
+              const songItem = document.createElement("li");
+              songItem.textContent = song.title;
+              songItem.onclick = () => playSong(song.title);
+              songsList.appendChild(songItem);
+            });
+            document.getElementById("songs-list").style.display = "block";
           } else {
-            alert(data.error || "Could not fetch the song.");
+            alert("No songs found for this artist.");
           }
         })
         .catch(error => {
-          console.error("Error playing song:", error);
+          console.error("Error fetching artist songs:", error);
         });
     }
+    
 
+  function playSong(songTitle) {
+    // Play the selected song
+    fetch(`/play-song/${encodeURIComponent(songTitle)}/`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.url) {
+          const audioPlayer = document.getElementById("audio-player");
+          audioPlayer.src = data.url;
+          audioPlayer.style.display = "block";
+          audioPlayer.play();
+        } else {
+          alert(data.error || "Could not fetch the song.");
+        }
+      })
+      .catch(error => {
+        console.error("Error playing song:", error);
+      });
+  }
+    
    
   </script>
 </html>
