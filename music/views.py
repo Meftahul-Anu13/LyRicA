@@ -249,3 +249,16 @@ def my_music(request):
     favorites = Favorites.objects.filter(user=user).select_related('song', 'album', 'artist')
     return render(request, 'my_music.html', {'favorites': favorites})
 
+def show_artists(request):
+    artists = Artist.objects.all()
+    # write code to see all the artists songs when i will click on the aritst and if i click on the song then 
+    # it will play the song
+    return render(request, 'artists.html', {'artists': artists})
+def get_artist_songs(request, artist_id):
+    try:
+        artist = Artist.objects.get(id=artist_id)
+        songs = Song.objects.filter(artist=artist).values("title")
+        return JsonResponse({"songs": list(songs)})
+    except Artist.DoesNotExist:
+        return JsonResponse({"error": "Artist not found."}, status=404)
+

@@ -275,3 +275,18 @@ header {
   cursor: not-allowed;
 }
 
+.artists-list, .songs-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+.artist-item, .songs-list li {
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin: 5px 0;
+  cursor: pointer;
+}
+.artist-item:hover, .songs-list li:hover {
+  background-color: #f0f0f0;
+}
+
+

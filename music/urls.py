@@ -55,6 +55,8 @@ urlpatterns = [
     path('my_music/', views.my_music, name='my_music'),
     path('remove-from-favorites/<int:song_id>/', views.remove_from_favorites, name='remove_from_favorites'),
     path('play-song/<str:song_title>/', views.play_song, name='play_song'),
+    path('artists/', views.show_artists, name='artists'),
+    path('get-artist-songs/<int:artist_id>/', views.get_artist_songs, name='get_artist_songs'),
 ]
 
 # Log the URL patterns
