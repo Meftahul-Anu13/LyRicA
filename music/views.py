@@ -263,8 +263,6 @@ def get_artist_songs(request, artist_id):
 def show_album(request):
     albums = Album.objects.all()
     return render(request, 'album.html', {'albums': albums})
-# when the album will be clicked then  it will show the songs including it in another dev using 
-# dropdown and then the song can be played ! write html code for this
 def get_album_songs(request, album_id):
     try:
         album = Album.objects.get(id=album_id)
@@ -272,5 +270,14 @@ def get_album_songs(request, album_id):
         return JsonResponse({"songs": list(songs)})
     except Album.DoesNotExist:
         return JsonResponse({"error": "Album not found."}, status=404)
+    
+def count_stream(request):
+    try:
+        song = Song.objects.get(id=request.POST['song_id'])
+        song.streams += 1
+        song.save
+        return JsonResponse({"message": "Stream count updated."})
+    except Song.DoesNotExist:
+        return JsonResponse({"error": "Song not found."}, status=404)
     
 

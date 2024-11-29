@@ -2,169 +2,179 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lyrica Music Player</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}" />
-  </head>
-  <body>
-    <div class="container">
-      <!-- Sidebar -->
-      <aside class="sidebar">
-        <div class="logo">Lyrica</div>
-        <nav class="menu">
-          <ul>
-            <li class="{% if request.path == '/index/' %}active{% endif %}"><a href="{% url 'index' %}">Discover</a></li>
-            <li class="{% if request.path == '/explore/' %}active{% endif %}"><a href="{% url 'index' %}">Explorer</a></li>
-            <li class="{% if request.path == '/song_list/' %}active{% endif %}"><a href="{% url 'song_list' %}">Search</a></li>
-          </ul>
-        </nav>
-        <div class="library">
-          <p>LIBRARY</p>
-          <ul>
-            <li class="{% if request.path == '/my_music/' %}active{% endif %}"><a href="{% url 'my_music' %}">My Music</a></li>
-            {% block my_music_fav %}
 
-            {% endblock %}
-            <li><a href="#">Albums</a></li>
-            <li><a href="{% url 'artists' %}">Artists</a></li>
-            
-          </ul>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lyrica Music Player</title>
+  <link rel="stylesheet" href="{% static 'styles.css' %}" />
+</head>
+
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">Lyrica</div>
+      <nav class="menu">
+        <ul>
+          <li class="{% if request.path == '/index/' %}active{% endif %}"><a href="{% url 'index' %}">Discover</a></li>
+          <li class="{% if request.path == '/explore/' %}active{% endif %}"><a href="{% url 'index' %}">Explorer</a>
+          </li>
+          <li class="{% if request.path == '/song_list/' %}active{% endif %}"><a href="{% url 'song_list' %}">Search</a>
+          </li>
+        </ul>
+      </nav>
+      <div class="library">
+        <p>LIBRARY</p>
+        <ul>
+          <li class="{% if request.path == '/my_music/' %}active{% endif %}"><a href="{% url 'my_music' %}">My Music</a>
+          </li>
+          {% block my_music_fav %}
+
+          {% endblock %}
+          <li><a href="{% url 'album' %}">Albums</a></li>
+          <li><a href="{% url 'artists' %}">Artists</a></li>
+
+        </ul>
+      </div>
+      <div class="playlist">
+        <p>PLAYLIST</p>
+        <ul>
+          <li><a href="#">Cover</a></li>
+          <li><a href="#">Favorites</a></li>
+          <li><a href="{% url 'signup' %}">Logout</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header>
+        <h1>{% block title %}Artists {% endblock %}</h1>
+        <div class="controls">
+          <button class="play">Play</button>
+          <button class="shuffle">Shuffle</button>
         </div>
-        <div class="playlist">
-          <p>PLAYLIST</p>
-          <ul>
-            <li><a href="#">Cover</a></li>
-            <li><a href="#">Favorites</a></li>
-            <li><a href="{% url 'signup' %}">Logout</a></li>
-          </ul>
+      </header>
+
+      <!-- Music List -->
+      <section class="artists-list">
+        <div class="artists-list">
+          {% for artist in artists %}
+          <div class="artist-item" onclick="showArtistSongs({{ artist.id }}, '{{ artist.name }}')">
+            <p>{{ artist.name }}</p>
+          </div>
+          {% empty %}
+          <p>No artists found.</p>
+          {% endfor %}
         </div>
-      </aside>
 
-      <!-- Main Content -->
-      <main class="main-content">
-        <header>
-          <h1>{% block title %}Artists {% endblock %}</h1>
-          <div class="controls">
-            <button class="play">Play</button>
-            <button class="shuffle">Shuffle</button>
-          </div>
-        </header>
-
-        <!-- Music List -->
-        <section class="artists-list">
-          <div class="artists-list">
-            {% for artist in artists %}
-            <div class="artist-item" onclick="showArtistSongs({{ artist.id }}, '{{ artist.name }}')">
-              <p>{{ artist.name }}</p>
-            </div>
-            {% empty %}
-            <p>No artists found.</p>
-            {% endfor %}
-          </div>
-      
-          <div class="songs-list" id="songs-list" style="display: none;">
-            <h2 id="artist-name">Songs</h2>
-            <ul id="song-items"></ul>
-          </div>
-      
-          <audio id="audio-player" controls style="width: 100%; display: none;">
-            Your browser does not support the audio element.
-          </audio>
-        </div>         
-        </section>
-      </main>
-
-      <!-- Now Playing Sidebar -->
-      <aside class="now-playing">
-        <div class="top-weekly">
-          <h3>Top 100 Weekly</h3>
-          <ul>
-            {% for weekly_song in weekly_top_songs %}
-              <li>
-                <span>{{ forloop.counter|add:"00" }}</span>
-                <p>{{ weekly_song.title }}</p>
-                <span>{{ weekly_song.duration|default:"3:00" }}</span>
-              </li>
-            {% empty %}
-              <li>
-                <p>No top songs available this week.</p>
-              </li>
-            {% endfor %}
-          </ul>
+        <div class="songs-list" id="songs-list" style="display: none;">
+          <h2 id="artist-name">Songs</h2>
+          <ul id="song-items"></ul>
         </div>
-        <div class="now-playing-details">
-          <h3>Now Playing</h3>
-          <div class="track-details" id="now-playing-details">
-            <p>No song is currently playing.</p>
-          </div>
-          <div class="progress" id="progress-bar" style="display: none;">
-            <!-- <span id="current-time">0:00</span>
-            <input type="range" min="0" max="100" value="0" id="progress-range" />
-            <span id="song-duration">3:00</span> -->
 
-          </div>
-          <audio id="audio-player" controls style="width: 100%; display: none;">
-            Your browser does not support the audio element.
-         </audio>
-          <div class="controls" id="controls" style="display: none;">
-            <button id="prev-btn">⏮</button>
-            <button id="play-pause-btn">⏸</button>
-            <button id="next-btn">⏭</button>
-          </div>
-        </div>
-      </aside>
+  </div>
+  </section>
+  </main>
+
+  <!-- Now Playing Sidebar -->
+  <aside class="now-playing">
+    <div class="top-weekly">
+      <h3>Top 100 Weekly</h3>
+      <ul>
+        {% for weekly_song in weekly_top_songs %}
+        <li>
+          <span>{{ forloop.counter|add:"00" }}</span>
+          <p>{{ weekly_song.title }}</p>
+          <span>{{ weekly_song.duration|default:"3:00" }}</span>
+        </li>
+        {% empty %}
+        <li>
+          <p>No top songs available this week.</p>
+        </li>
+        {% endfor %}
+      </ul>
     </div>
+    <div class="now-playing-details">
+      <h3>Now Playing</h3>
+      <div class="track-details" id="now-playing-details">
+        <p>No song is currently playing.</p>
+      </div>
+      <div class="progress" id="progress-bar" style="display: none;">
 
-    <!-- JavaScript Section -->
-    <!-- <script src="{% static 'js/scripts.js' %}"></script> -->
-  </body>
-  <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-  <script>
-    function showArtistSongs(artistId, artistName) {
-      // Hide and reset the audio player
-      const audioPlayer = document.getElementById("audio-player");
-      audioPlayer.pause(); // Stop any ongoing playback
-      audioPlayer.style.display = "none"; // Hide the audio player
-      audioPlayer.src = ""; // Clear the audio source
-    
-      // Fetch songs for the selected artist from the backend
-      fetch(`/get-artist-songs/${artistId}/`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.songs && data.songs.length > 0) {
-            // Display the artist name and song list
-            document.getElementById("artist-name").textContent = `Songs by ${artistName}`;
-            const songsList = document.getElementById("song-items");
-            songsList.innerHTML = ""; // Clear existing songs
-            data.songs.forEach(song => {
-              const songItem = document.createElement("li");
-              songItem.textContent = song.title;
-              songItem.onclick = () => playSong(song.title);
-              songsList.appendChild(songItem);
-            });
-            document.getElementById("songs-list").style.display = "block";
-          } else {
-            alert("No songs found for this artist.");
-          }
-        })
-        .catch(error => {
-          console.error("Error fetching artist songs:", error);
-        });
-    }
-    
+      </div>
+      <audio id="audio-player" controls style="width: 100%; display: none;">
+        Your browser does not support the audio element.
+      </audio>
 
-  function playSong(songTitle) {
-    // Play the selected song
+    </div>
+  </aside>
+  </div>
+</body>
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+<script>
+  function showArtistSongs(artistId, artistName) {
+    // Hide and reset the audio player
+    const audioPlayer = document.getElementById("audio-player");
+    audioPlayer.pause();
+    audioPlayer.style.display = "none";
+    audioPlayer.src = "";
+
+    // Reset the "Now Playing" details
+    const nowPlayingDetails = document.getElementById("now-playing-details");
+    nowPlayingDetails.innerHTML = `<p>No song is currently playing.</p>`;
+
+    // Fetch songs for the selected artist
+    fetch(`/get-artist-songs/${artistId}/`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.songs && data.songs.length > 0) {
+          // Display artist name and songs
+          document.getElementById("artist-name").textContent = `Songs by ${artistName}`;
+          const songsList = document.getElementById("song-items");
+          songsList.innerHTML = ""; // Clear old songs
+          data.songs.forEach(song => {
+            const songItem = document.createElement("li");
+            songItem.textContent = song.title;
+            songItem.onclick = () => playSong(song.title, artistName);
+            songsList.appendChild(songItem);
+          });
+          document.getElementById("songs-list").style.display = "block";
+        } else {
+          alert("No songs found for this artist.");
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching artist songs:", error);
+      });
+  }
+
+  function playSong(songTitle, artistName) {
+    // Fetch and play the selected song
     fetch(`/play-song/${encodeURIComponent(songTitle)}/`)
       .then(response => response.json())
       .then(data => {
         if (data.url) {
+          // Update the audio player
           const audioPlayer = document.getElementById("audio-player");
           audioPlayer.src = data.url;
           audioPlayer.style.display = "block";
           audioPlayer.play();
+
+          // Update the "Now Playing" details
+          const nowPlayingDetails = document.getElementById("now-playing-details");
+          nowPlayingDetails.innerHTML = `
+        
+              <p><strong>${songTitle}</strong> by ${artistName}</p>
+            `;
+
+          // Optionally, show progress and controls
+          document.getElementById("progress-bar").style.display = "block";
+          document.getElementById("controls").style.display = "block";
+
+          // Sync the "Now Playing" sidebar
+          updateNowPlaying(songTitle, artistName);
         } else {
           alert(data.error || "Could not fetch the song.");
         }
@@ -173,7 +183,16 @@
         console.error("Error playing song:", error);
       });
   }
-    
-   
-  </script>
+
+  function updateNowPlaying(songTitle, artistName) {
+    // Update now-playing section without refresh
+    const nowPlayingDetails = document.getElementById("now-playing-details");
+    nowPlayingDetails.innerHTML = `
+        <p><strong>Now Playing:</strong></p>
+        
+      `;
+  }
+</script>
+
 </html>
+<
