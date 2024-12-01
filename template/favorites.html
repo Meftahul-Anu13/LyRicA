@@ -39,7 +39,6 @@
                 <ul>
                     <li><a href="#">Cover</a></li>
                     <li><a href="{% url 'favorites' %}">Favorites</a></li>
-
                     <li><a href="{% url 'signup' %}">Logout</a></li>
                 </ul>
             </div>
@@ -57,22 +56,23 @@
 
             <!-- Music List -->
             <section class="music-list">
-                {% block music_list %}
-                {% if listens %}
-                {% for listen in listens %}
-                <div class="track">
-                    <img src="{% static 'images/image.png' %}" alt="{{ listen.song.title }}" class="album-art" />
-                    <div class="track-info">
-                        <p class="track-title">{{ listen.song.title }}</p>
-                        <p class="track-artist">{{ listen.song.artist.name }}</p>
-                        <!-- <p class="played-at">Played At: {{ listen.played_at|date:"M d, Y H:i" }}</p> -->
+                {% block music_list_fav %}
+                {% for favorite in favorites %}
+                <div class="track" data-index="{{ forloop.counter0 }}">
+                    <img src="{% static 'images/image.png' %}" alt="{{ favorite.song.title }}" class="album-art" />
+                    <div class="track-info"
+                        onclick="playSong('{{ favorite.song.title }}', '{{ favorite.artist.name }}')">
+                        <p class="track-title">{{ favorite.song.title }}</p>
+                        <p class="track-artist">{{ favorite.artist.name }}</p>
+
                     </div>
-                    <button class="add-to-favorites" data-song-id="{{ listen.song.id }}">❤️ Add</button>
+                    <button class="remove-from-favorites" data-song-id="{{ favorite.song.id }}">
+                        Remove ❤️
+                    </button>
                 </div>
+                {% empty %}
+                <p>No favorite songs yet!</p>
                 {% endfor %}
-                {% else %}
-                <p>No recently played songs found.</p>
-                {% endif %}
                 {% endblock %}
             </section>
         </main>
@@ -102,8 +102,8 @@
                 </div>
                 <audio id="audio-player" controls style="width: 100%; display: none;">
                     Your browser does not support the audio element.
-                </audio>
-            </div>
+                </audio>             
+            </div>            
     </div>
     </aside>
     </div>
@@ -111,12 +111,34 @@
 </body>
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 <script>
-    document.querySelectorAll('.track').forEach(track => {
-        track.addEventListener('click', function () {
-            const songTitle = this.querySelector('.track-title').textContent;
-            const artistName = this.querySelector('.track-artist').textContent;
+    document.querySelectorAll('.remove-from-favorites').forEach(button => {
+        button.addEventListener('click', function () {
+            const songId = this.dataset.songId; // Get the song ID from the button
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value; // Get the CSRF token
 
-            playSong(songTitle, artistName);
+            // Send a POST request to remove the song from favorites
+            fetch(`/remove-from-favorites/${songId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert(data.message); // Show success message
+
+                        // Remove the song from the DOM
+                        const track = this.closest('.track');
+                        track.parentNode.removeChild(track);
+                    } else if (data.error) {
+                        alert(data.error); // Show error message
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         });
     });
 
@@ -147,36 +169,6 @@
                 alert("An error occurred while trying to play the song.");
             });
     }
-
-    // Add event listeners to "Add to Favorites" buttons
-    document.querySelectorAll('.add-to-favorites').forEach(button => {
-        button.addEventListener('click', function (event) {
-            event.stopPropagation(); // Prevent triggering the play event
-            const songId = this.dataset.songId;
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-            fetch(`/add-to-favorites/${songId}/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    alert(data.message);
-                    this.textContent = '❤️ Added';
-                    this.disabled = true;
-                } else if (data.error) {
-                    alert(data.error);
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
-        });
-    });
 </script>
 
 </html>

@@ -29,9 +29,7 @@
         <ul>
           <li class="{% if request.path == '/my_music/' %}active{% endif %}"><a href="{% url 'my_music' %}">My Music</a>
           </li>
-          {% block my_music_fav %}
-
-          {% endblock %}
+         
           <li><a href="{% url 'album' %}">Albums</a></li>
           <li><a href="{% url 'artists' %}">Artists</a></li>
 
@@ -41,7 +39,10 @@
         <p>PLAYLIST</p>
         <ul>
           <li><a href="#">Cover</a></li>
-          <li><a href="#">Favorites</a></li>
+          <li><a href="{% url 'favorites' %}">Favorites</a></li>
+          {% block my_music_fav %}
+
+          {% endblock %}
           <li><a href="{% url 'signup' %}">Logout</a></li>
         </ul>
       </div>
@@ -63,6 +64,7 @@
           {% for artist in artists %}
           <div class="artist-item" onclick="showArtistSongs({{ artist.id }}, '{{ artist.name }}')">
             <p>{{ artist.name }}</p>
+            <!-- <p>{{ artist.id }}</p> -->
           </div>
           {% empty %}
           <p>No artists found.</p>
@@ -115,18 +117,17 @@
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 <script>
   function showArtistSongs(artistId, artistName) {
-    // Hide and reset the audio player
+    // Reset the audio player and "Now Playing" section
     const audioPlayer = document.getElementById("audio-player");
     audioPlayer.pause();
     audioPlayer.style.display = "none";
     audioPlayer.src = "";
 
-    // Reset the "Now Playing" details
     const nowPlayingDetails = document.getElementById("now-playing-details");
     nowPlayingDetails.innerHTML = `<p>No song is currently playing.</p>`;
 
     // Fetch songs for the selected artist
-    fetch(`/get-artist-songs/${artistId}/`)
+    fetch(`/get-artist-songs/${artistId}/`)  // Ensure correct artistId is passed here
       .then(response => response.json())
       .then(data => {
         if (data.songs && data.songs.length > 0) {
@@ -134,10 +135,11 @@
           document.getElementById("artist-name").textContent = `Songs by ${artistName}`;
           const songsList = document.getElementById("song-items");
           songsList.innerHTML = ""; // Clear old songs
+          
           data.songs.forEach(song => {
             const songItem = document.createElement("li");
-            songItem.textContent = song.title;
-            songItem.onclick = () => playSong(song.title, artistName);
+            songItem.textContent = song.song_title;  // Use the song_title from the response
+            songItem.onclick = () => playSong(song.song_title, song.artist_name);  // Ensure song title is clickable
             songsList.appendChild(songItem);
           });
           document.getElementById("songs-list").style.display = "block";
@@ -148,7 +150,8 @@
       .catch(error => {
         console.error("Error fetching artist songs:", error);
       });
-  }
+}
+
 
   function playSong(songTitle, artistName) {
     // Fetch and play the selected song
@@ -195,4 +198,3 @@
 </script>
 
 </html>
-<

@@ -2,163 +2,194 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lyrica Music Player</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}" />
-  </head>
-  <body>
-    <div class="container">
-      <!-- Sidebar -->
-      <aside class="sidebar">
-        <div class="logo">Lyrica</div>
-        <nav class="menu">
-          <ul>
-            <li class="{% if request.path == '/index/' %}active{% endif %}"><a href="{% url 'index' %}">Discover</a></li>
-            <li class="{% if request.path == '/explore/' %}active{% endif %}"><a href="{% url 'index' %}">Explorer</a></li>
-            <li class="{% if request.path == '/song_list/' %}active{% endif %}"><a href="{% url 'song_list' %}">Search</a></li>
-          </ul>
-        </nav>
-        <div class="library">
-          <p>LIBRARY</p>
-          <ul>
-            <li class="{% if request.path == '/my_music/' %}active{% endif %}"><a href="{% url 'my_music' %}">My Music</a></li>
-            {% block my_music_fav %}
 
-            {% endblock %}
-            <li><a href="{% url 'album' %}">Albums</a></li>
-            <li><a href="{% url 'artists' %}">Artists</a></li>
-          </ul>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lyrica Music Player</title>
+  <link rel="stylesheet" href="{% static 'styles.css' %}" />
+</head>
+
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">Lyrica</div>
+      <nav class="menu">
+        <ul>
+          <li class="{% if request.path == '/index/' %}active{% endif %}"><a href="{% url 'index' %}">Discover</a></li>
+          <li class="{% if request.path == '/explore/' %}active{% endif %}"><a href="{% url 'index' %}">Explorer</a>
+          </li>
+          <li class="{% if request.path == '/song_list/' %}active{% endif %}"><a href="{% url 'song_list' %}">Search</a>
+          </li>
+        </ul>
+      </nav>
+      <div class="library">
+        <p>LIBRARY</p>
+        <ul>
+          <li class="{% if request.path == '/my_music/' %}active{% endif %}"><a href="{% url 'my_music' %}">My Music</a>
+          </li>
+
+          <li><a href="{% url 'album' %}">Albums</a></li>
+          <li><a href="{% url 'artists' %}">Artists</a></li>
+        </ul>
+      </div>
+      <div class="playlist">
+        <p>PLAYLIST</p>
+        <ul>
+          <li><a href="#">Cover</a></li>
+          <li><a href="{% url 'favorites' %}">Favorites</a></li>
+          {% block my_music_fav %}
+
+          {% endblock %}
+          <li><a href="{% url 'signup' %}">Logout</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header>
+        <h1>{% block title %}Albums {% endblock %}</h1>
+        <div class="controls">
+          <button class="play">Play</button>
+          <button class="shuffle">Shuffle</button>
         </div>
-        <div class="playlist">
-          <p>PLAYLIST</p>
-          <ul>
-            <li><a href="#">Cover</a></li>
-            <li><a href="#">Favorites</a></li>
-            <li><a href="{% url 'signup' %}">Logout</a></li>
-          </ul>
+      </header>
+
+      <!-- Music List -->
+      <section class="albums-list">
+        <!-- Album List -->
+        <div class="albums-list">
+          {% for album in albums %}
+          <div class="album-item" onclick="showAlbumSongs({{ album.id }}, '{{ album.title }}')">
+            <p>{{ album.title }}</p>
+          </div>
+          {% empty %}
+          <p>No albums found.</p>
+          {% endfor %}
         </div>
-      </aside>
 
-      <!-- Main Content -->
-      <main class="main-content">
-        <header>
-          <h1>{% block title %}Albums {% endblock %}</h1>
-          <div class="controls">
-            <button class="play">Play</button>
-            <button class="shuffle">Shuffle</button>
-          </div>
-        </header>
-
-        <!-- Music List -->
-        <section class="albums-list">
-          <!-- Album List -->
-          <div class="albums-list">
-            {% for album in albums %}
-            <div class="album-item" onclick="showAlbumSongs({{ album.id }}, '{{ album.title }}')">
-              <p>{{ album.title }}</p>
-            </div>
-            {% empty %}
-            <p>No albums found.</p>
-            {% endfor %}
-          </div>
-
-          <!-- Songs List -->
-          <div class="songs-list" id="songs-list" style="display: none;">
-            <h2 id="album-title">Songs</h2>
-            <ul id="song-items"></ul>
-          </div>
-        </section>
-      </main>
-
-      <!-- Now Playing Sidebar -->
-      <aside class="now-playing">
-        <div class="top-weekly">
-          <h3>Top 100 Weekly</h3>
-          <ul>
-            {% for weekly_song in weekly_top_songs %}
-              <li>
-                <span>{{ forloop.counter|add:"00" }}</span>
-                <p>{{ weekly_song.title }}</p>
-                <span>{{ weekly_song.duration|default:"3:00" }}</span>
-              </li>
-            {% empty %}
-              <li>
-                <p>No top songs available this week.</p>
-              </li>
-            {% endfor %}
-          </ul>
+        <!-- Songs List -->
+        <div class="songs-list" id="songs-list" style="display: none;">
+          <h2 id="album-title">Songs</h2>
+          <ul id="song-items"></ul>
         </div>
-        <div class="now-playing-details">
-          <h3>Now Playing</h3>
-          <div class="track-details" id="now-playing-details">
-            <p>No song is currently playing.</p>
-          </div>
-          <div class="progress" id="progress-bar" style="display: none;"></div>
-          <audio id="audio-player" controls style="width: 100%; display: none;">
-            Your browser does not support the audio element.
-          </audio>
+      </section>
+    </main>
+
+    <!-- Now Playing Sidebar -->
+    <aside class="now-playing">
+      <div class="top-weekly">
+        <h3>Top 100 Weekly</h3>
+        <ul>
+          {% for weekly_song in weekly_top_songs %}
+          <li>
+            <span>{{ forloop.counter|add:"00" }}</span>
+            <p>{{ weekly_song.title }}</p>
+            <span>{{ weekly_song.duration|default:"3:00" }}</span>
+          </li>
+          {% empty %}
+          <li>
+            <p>No top songs available this week.</p>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="now-playing-details">
+        <h3>Now Playing</h3>
+        <div class="track-details" id="now-playing-details">
+          <p>No song is currently playing.</p>
         </div>
-      </aside>
-    </div>
+        <div class="progress" id="progress-bar" style="display: none;"></div>
+        <audio id="audio-player" controls style="width: 100%; display: none;">
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+    </aside>
+  </div>
 
-    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-    <script>
-      function showAlbumSongs(albumId, albumTitle) {
-        // Reset "Now Playing" section
-        const nowPlayingDetails = document.getElementById("now-playing-details");
-        nowPlayingDetails.innerHTML = `<p>No song is currently playing.</p>`;
-
-        // Hide the audio player
-        const audioPlayer = document.getElementById("audio-player");
-        audioPlayer.style.display = "none";
-        audioPlayer.pause();
-
-        // Fetch songs for the album
-        fetch(`/get-album-songs/${albumId}/`)
-          .then(response => response.json())
-          .then(data => {
-            const songItems = document.getElementById("song-items");
-            songItems.innerHTML = ""; // Clear previous songs
-            if (data.songs && data.songs.length > 0) {
-              document.getElementById("album-title").textContent = `Songs in ${albumTitle}`;
-              data.songs.forEach(song => {
-                const songItem = document.createElement("li");
-                songItem.textContent = song.title;
-                songItem.className = "song-item";
-                songItem.onclick = () => playSong(song.title, albumTitle);
-                songItems.appendChild(songItem);
-              });
-              document.getElementById("songs-list").style.display = "block";
-            } else {
-              alert("No songs found in this album.");
-            }
-          })
-          .catch(error => console.error("Error fetching album songs:", error));
-      }
-
-      function playSong(songTitle, albumTitle) {
-        // Fetch the song and play it
-        fetch(`/play-song/${encodeURIComponent(songTitle)}/`)
-          .then(response => response.json())
-          .then(data => {
-            if (data.url) {
-              const audioPlayer = document.getElementById("audio-player");
-              audioPlayer.src = data.url;
-              audioPlayer.style.display = "block";
-              audioPlayer.play();
-
-              const nowPlayingDetails = document.getElementById("now-playing-details");
-              nowPlayingDetails.innerHTML = `
-                <p><strong>${songTitle}</strong> from <em>${albumTitle}</em></p>
+  <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+  <script>
+    function showAlbumSongs(albumId, albumName) {
+      // Reset the audio player and "Now Playing" section
+      const audioPlayer = document.getElementById("audio-player");
+      audioPlayer.pause();
+      audioPlayer.style.display = "none";
+      audioPlayer.src = "";
+    
+      const nowPlayingDetails = document.getElementById("now-playing-details");
+      nowPlayingDetails.innerHTML = `<p>No song is currently playing.</p>`;
+    
+      // Fetch songs for the selected album
+      fetch(`/get-album-songs/${albumId}/`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.songs && data.songs.length > 0) {
+            // Display album name and songs
+            document.getElementById("album-title").textContent = `Songs from ${albumName}`;
+            const songsList = document.getElementById("song-items");
+            songsList.innerHTML = ""; // Clear old songs
+    
+            data.songs.forEach(song => {
+              const songItem = document.createElement("li");
+              songItem.textContent = song.song_title;  // Use the song_title from the response
+              songItem.onclick = () => playSong(song.song_title, song.artist_name);  // Ensure song title is clickable
+              songsList.appendChild(songItem);
+            });
+            document.getElementById("songs-list").style.display = "block";
+          } else {
+            alert("No songs found for this album.");
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching album songs:", error);
+        });
+    }
+    function playSong(songTitle, artistName) {
+      // Fetch and play the selected song
+      fetch(`/play-song/${encodeURIComponent(songTitle)}/`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.url) {
+            // Update the audio player
+            const audioPlayer = document.getElementById("audio-player");
+            audioPlayer.src = data.url;
+            audioPlayer.style.display = "block";
+            audioPlayer.play();
+  
+            // Update the "Now Playing" details
+            const nowPlayingDetails = document.getElementById("now-playing-details");
+            nowPlayingDetails.innerHTML = `
+          
+                <p><strong>${songTitle}</strong> by ${artistName}</p>
               `;
-            } else {
-              alert(data.error || "Could not fetch the song.");
-            }
-          })
-          .catch(error => console.error("Error playing song:", error));
-      }
-    </script>
-  </body>
+  
+            // Optionally, show progress and controls
+            document.getElementById("progress-bar").style.display = "block";
+            document.getElementById("controls").style.display = "block";
+  
+            // Sync the "Now Playing" sidebar
+            updateNowPlaying(songTitle, artistName);
+          } else {
+            alert(data.error || "Could not fetch the song.");
+          }
+        })
+        .catch(error => {
+          console.error("Error playing song:", error);
+        });
+    }
+  
+    function updateNowPlaying(songTitle, artistName) {
+      // Update now-playing section without refresh
+      const nowPlayingDetails = document.getElementById("now-playing-details");
+      nowPlayingDetails.innerHTML = `
+          <p><strong>Now Playing:</strong></p>
+          
+        `;
+    }
+
+  </script>
+</body>
+
 </html>

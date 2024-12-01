@@ -12,12 +12,15 @@ from .forms import SignupForm
 from django.views.decorators.csrf import csrf_exempt    
 from dotenv import load_dotenv
 from django.contrib.auth.decorators import login_required
-from .models import Song,Artist,Favorites, Playlist, User,UserType,Album
+from .models import Song,Artist,Favorites, Playlist, User,UserType,Album,Listen
 from .forms import LoginForm
 from django.contrib.auth.hashers import check_password 
+from django.utils.timezone import now
+import logging
 
 # Load environment variables
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 # Fetch credentials from environment variables
 PCLOUD_USERNAME = os.getenv('PCLOUD_USERNAME')
@@ -169,11 +172,17 @@ def search(request):
     return render(request, 'music/search_results.html', context)          
 # use this play_song to play the clcking song in the now playing songs part 
 def play_song(request, song_title):
+    """Fetch the song, increment the stream count, and return the playback URL."""
     try:
+        # Fetch song from database
+        song = Song.objects.filter(title=song_title).first()
+        if not song:
+            return JsonResponse({"error": "Song not found in database."}, status=404)
+
         # Authenticate with pCloud
         auth_token = authenticate_pcloud()
 
-        # Fetch the file path for the given song title
+        # Fetch file path from pCloud
         folder_contents = list_folder_contents(auth_token, PCLOUD_MUSIC_FOLDER)
         matching_song = next(
             (item for item in folder_contents.get("metadata", {}).get("contents", [])
@@ -181,20 +190,36 @@ def play_song(request, song_title):
             None
         )
 
-        if matching_song:
-            file_path = matching_song["path"]
-            # Fetch the direct file link
-            response = requests.post(
-                'https://api.pcloud.com/getfilelink',
-                data={'auth': auth_token, 'path': file_path}
-            )
-            if response.status_code == 200:
-                file_link = f"https://{response.json()['hosts'][0]}{response.json()['path']}"
-                return JsonResponse({"url": file_link})
-            else:
-                return HttpResponse("Error fetching song link.", status=400)
-        else:
-            return JsonResponse({"error": "Song not found in pCloud folder."}, status=404)
+        if not matching_song:
+            return JsonResponse({"error": "Song not found in pCloud."}, status=404)
+
+        # Get file link
+        file_path = matching_song["path"]
+        response = requests.post(
+            'https://api.pcloud.com/getfilelink',
+            data={'auth': auth_token, 'path': file_path}
+        )
+        if response.status_code != 200:
+            return HttpResponse("Error fetching song link.", status=400)
+
+        file_link = f"https://{response.json()['hosts'][0]}{response.json()['path']}"
+
+        # Create a Listen record (triggers the increment in the database)
+        Listen.objects.create(
+            user=request.user,
+            song=song,
+            played_at=now(),
+            status='played',
+            play_mode='online',
+        )
+        
+           # Log stream count increment
+        song.refresh_from_db()  # Fetch updated song object after the trigger executes
+        logger.info(f"Song '{song.title}' streams incremented to: {song.streams}")
+        print("stream is +1")
+
+        # Return the song URL
+        return JsonResponse({"url": file_link})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
@@ -215,6 +240,12 @@ def add_to_favorites(request, song_id):
         try:
             user = request.user
             song = Song.objects.get(id=song_id)
+
+            # Check if the song is already in the user's favorites
+            if Favorites.objects.filter(user=user, song=song).exists():
+                return JsonResponse({'error': 'Song is already in favorites.'}, status=400)
+
+            # Add the song to favorites
             favorite = Favorites.objects.create(
                 user=user,
                 song=song,
@@ -229,6 +260,7 @@ def add_to_favorites(request, song_id):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
+
 
 @login_required
 def remove_from_favorites(request, song_id):
@@ -245,39 +277,192 @@ def remove_from_favorites(request, song_id):
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
 @login_required
 def my_music(request):
+
+    user = request.user
+    listens = Listen.objects.filter(user=user).order_by('-played_at')
+    
+    # Remove duplicate songs manually
+    unique_songs = {}
+    for listen in listens:
+        if listen.song.id not in unique_songs:
+            unique_songs[listen.song.id] = listen
+    
+    # Convert to a list
+    unique_listens = list(unique_songs.values())
+    
+    return render(request, 'my_music.html', {'listens': unique_listens})
+
+
+@login_required
+def favorites(request):
     user = request.user
     favorites = Favorites.objects.filter(user=user).select_related('song', 'album', 'artist')
-    return render(request, 'my_music.html', {'favorites': favorites})
-
+    return render(request, 'favorites.html', {'favorites': favorites})
+@login_required
 def show_artists(request):
-    artists = Artist.objects.all()
+    user = request.user
+    
+    # Get all listens by the user, ordered by most recent
+    listens = Listen.objects.filter(user=user).order_by('-played_at')
+
+    # Remove duplicate songs manually by storing the first occurrence in a dictionary
+    unique_songs = {}
+    for listen in listens:
+        if listen.song.id not in unique_songs:
+            unique_songs[listen.song.id] = listen
+
+    # Get the unique listens as a list
+    unique_listens = list(unique_songs.values())
+
+    # Get a list of artists based on the unique songs
+    artist_ids = set([listen.song.artist.id for listen in unique_listens])
+
+    # Get artist objects from the artist ids
+    artists = Artist.objects.filter(id__in=artist_ids)
+
+    # Pass the artists to the template
     return render(request, 'artists.html', {'artists': artists})
+
+@login_required
 def get_artist_songs(request, artist_id):
     try:
+        user = request.user
+        
+        # Get all listens by the user, ordered by most recent
+        listens = Listen.objects.filter(user=user).order_by('-played_at')
+
+        # Remove duplicate songs manually by storing the first occurrence in a dictionary
+        unique_songs = {}
+        for listen in listens:
+            if listen.song.id not in unique_songs:
+                unique_songs[listen.song.id] = listen
+
+        # Get the unique listens as a list
+        unique_listens = list(unique_songs.values())
+
+        # Get the artist by id
         artist = Artist.objects.get(id=artist_id)
-        songs = Song.objects.filter(artist=artist).values("title")
-        return JsonResponse({"songs": list(songs)})
+
+        # Filter unique listens to only include songs from the requested artist
+        artist_songs = []
+        for listen in unique_listens:
+            if listen.song.artist.id == artist.id:  # Check if the song's artist matches the requested artist
+                artist_songs.append({
+                    'song_id': listen.song.id,
+                    'song_title': listen.song.title,
+                    'artist_name': listen.song.artist.name,
+                })
+
+        return JsonResponse({"songs": artist_songs})
+
     except Artist.DoesNotExist:
         return JsonResponse({"error": "Artist not found."}, status=404)
-    
+@login_required
 def show_album(request):
-    albums = Album.objects.all()
+    user = request.user
+    
+    # Get all listens by the user, ordered by most recent
+    listens = Listen.objects.filter(user=user).order_by('-played_at')
+
+    # Remove duplicate songs manually by storing the first occurrence in a dictionary
+    unique_songs = {}
+    for listen in listens:
+        if listen.song.id not in unique_songs:
+            unique_songs[listen.song.id] = listen
+
+    # Get the unique listens as a list
+    unique_listens = list(unique_songs.values())
+
+    # Get the albums which contain songs that the user has listened to
+    album_ids = set([listen.song.album.id for listen in unique_listens if listen.song.album])
+    albums = Album.objects.filter(id__in=album_ids)
+
     return render(request, 'album.html', {'albums': albums})
+
+@login_required
 def get_album_songs(request, album_id):
     try:
+        user = request.user
+        
+        # Get all listens by the user, ordered by most recent
+        listens = Listen.objects.filter(user=user).order_by('-played_at')
+
+        # Remove duplicate songs manually by storing the first occurrence in a dictionary
+        unique_songs = {}
+        for listen in listens:
+            if listen.song.id not in unique_songs:
+                unique_songs[listen.song.id] = listen
+
+        # Get the unique listens as a list
+        unique_listens = list(unique_songs.values())
+
+        # Get the album by id
         album = Album.objects.get(id=album_id)
-        songs = Song.objects.filter(album=album).values("title")
-        return JsonResponse({"songs": list(songs)})
+
+        # Filter unique listens to only include songs from the requested album
+        album_songs = []
+        for listen in unique_listens:
+            if listen.song.album.id == album.id:  # Check if the song's album matches the requested album
+                album_songs.append({
+                    'song_id': listen.song.id,
+                    'song_title': listen.song.title,
+                    'artist_name': listen.song.artist.name,
+                })
+
+        return JsonResponse({"songs": album_songs})
+
     except Album.DoesNotExist:
         return JsonResponse({"error": "Album not found."}, status=404)
-    
-def count_stream(request):
-    try:
-        song = Song.objects.get(id=request.POST['song_id'])
-        song.streams += 1
-        song.save
-        return JsonResponse({"message": "Stream count updated."})
-    except Song.DoesNotExist:
-        return JsonResponse({"error": "Song not found."}, status=404)
-    
 
+
+@login_required
+def top_songs(request):
+    user = request.user
+
+    try:
+        # # Get all listens by the user, ordered by the latest play time
+        # listens = Listen.objects.filter(user=user).order_by("-played_at")
+        
+        # # Deduplicate songs based on the highest play timestamp
+        # unique_songs = {}
+        # for listen in listens:
+        #     if listen.song.id not in unique_songs:
+        #         unique_songs[listen.song.id] = listen
+
+        # # Create a list of unique listens
+        # unique_listens = list(unique_songs.values())
+
+        # # Fetch additional data from the Song model and order by streams
+        # song_ids = [listen.song.id for listen in unique_listens]
+        # songs = (
+        #     Song.objects.filter(id__in=song_ids)
+        #     .order_by("-streams")[:5]  # Limit to top 5 streamed songs
+        # )
+
+        # # Format the data for JSON response
+        # top_songs = [
+        #     {
+        #         "song_id": song.id,
+        #         "song_title": song.title,
+        #         "artist_name": song.artist.name,
+        #         "streams": song.streams,
+        #     }
+        #     for song in songs
+        # ]
+        
+         # Fetch the top 5 songs ordered by streams
+        songs = Song.objects.all().order_by('-streams')[:5]
+
+        # Create a list of top songs data
+        top_songs = [
+            {
+                "song_title": song.title,
+                "artist_name": song.artist.name,
+                "streams": song.streams,
+            }
+            for song in songs
+        ]
+
+        return JsonResponse({"songs": top_songs})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

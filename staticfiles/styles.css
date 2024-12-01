@@ -353,3 +353,8 @@ audio {
   }
 }
 
+.top-song-item {
+  margin: 10px 0;
+  font-size: 1em;
+}
+
