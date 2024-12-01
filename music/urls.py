@@ -47,6 +47,7 @@ urlpatterns = [
     path('login2/', views.login_view, name='login2'),
     # path('play/', views.song_list, name='song_list'),
     path('', views.song_list, name='song_list'),
+   
     path('', views.index, name='index'),
     path('song/<int:song_index>/', views.song_detail, name='song_detail'),
     path("play_song/", views.play_song, name="play_song"),
@@ -60,7 +61,8 @@ urlpatterns = [
     path('albums/', views.show_album, name='album'),
     path('get-album-songs/<int:album_id>/', views.get_album_songs,name ='get_album_songs'),
     path('favorites/', views.favorites, name='favorites'),
-    path("top-songs/", views.top_songs, name="top_songs"),
+    path('top-songs/', views.top_songs, name='top_songs'),
+    path('increment-stream/<int:song_id>/', views.increment_stream, name='increment_stream'),
 ]
 
 # Log the URL patterns

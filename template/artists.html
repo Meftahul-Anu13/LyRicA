@@ -82,21 +82,12 @@
 
   <!-- Now Playing Sidebar -->
   <aside class="now-playing">
-    <div class="top-weekly">
-      <h3>Top 100 Weekly</h3>
-      <ul>
-        {% for weekly_song in weekly_top_songs %}
-        <li>
-          <span>{{ forloop.counter|add:"00" }}</span>
-          <p>{{ weekly_song.title }}</p>
-          <span>{{ weekly_song.duration|default:"3:00" }}</span>
-        </li>
-        {% empty %}
-        <li>
-          <p>No top songs available this week.</p>
-        </li>
-        {% endfor %}
-      </ul>
+    <div class="top-songs">
+      <h3>Top songs</h3>
+
+      <div id="top-songs-container">
+        <!-- Top songs will be inserted here -->
+      </div>
     </div>
     <div class="now-playing-details">
       <h3>Now Playing</h3>
@@ -116,6 +107,65 @@
 </body>
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const topSongsContainer = document.getElementById("top-songs-container");
+
+    // Fetch and render top songs
+    function fetchTopSongs() {
+      fetch("/top-songs/")
+        .then((response) => response.json())
+        .then((data) => {
+          const topSongs = data.songs;
+
+          // Clear the container
+          topSongsContainer.innerHTML = "";
+
+          if (topSongs.length > 0) {
+            topSongs.forEach((song) => {
+              const songElement = document.createElement("div");
+              songElement.classList.add("track");
+              songElement.setAttribute("data-song-title", song.song_title);
+              songElement.setAttribute("data-artist-name", song.artist_name);
+              songElement.style.backgroundColor = "#fff";  // Set a simple background color directly
+              songElement.style.padding = "15px";
+              songElement.style.display = "none";
+              songElement.offsetHeight; // Force reflow
+              songElement.style.display = "flex"; // Or any other valid display style
+
+
+              songElement.innerHTML = `
+                <!-- <img src="{% static 'images/image.png' %}" alt="${song.song_title}" class="album-art" /> -->
+                <div class="track-info">
+                  <p class="track-title">${song.song_title}</p>
+                  <p class="track-artist">${song.artist_name}</p>
+                  <!-- <p class="track-streams">${song.streams} streams</p> -->
+                </div>
+              `;
+
+              // Add click event to play song
+              songElement.addEventListener("click", function () {
+                const songTitle = this.getAttribute("data-song-title");
+                const artistName = this.getAttribute("data-artist-name");
+                playSong(songTitle, artistName); // Call the original playSong function
+              });
+
+              topSongsContainer.appendChild(songElement);
+            });
+          } else {
+            topSongsContainer.innerHTML = "<p>No top songs available.</p>";
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching top songs:", error);
+          topSongsContainer.innerHTML =
+            "<p>Error loading songs. Please try again later.</p>";
+        });
+    }
+
+    // Initial Fetch
+    fetchTopSongs();
+  });
+
   function showArtistSongs(artistId, artistName) {
     // Reset the audio player and "Now Playing" section
     const audioPlayer = document.getElementById("audio-player");

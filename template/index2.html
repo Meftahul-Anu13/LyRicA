@@ -85,40 +85,28 @@
     <aside class="now-playing">
       <div class="top-songs">
         <h3>Top songs</h3>
-        <ul id="top-songs-list">
-          {% for song in top_songs %}
-          <div class="track" data-index="{{ forloop.counter0 }}" onclick="playSong({{ forloop.counter0 }})">
-            <img src="{% static 'images/image.png' %}" alt="{{ song.song_title }}" class="album-art" />
-            <div class="track-info" onclick="playSong('{{ song.song_title }}', '{{ song.artist_name }}')">
-              <p class="track-title">{{ song.song_title }}</p>
-              <p class="track-artist">{{ song.artist_name }}</p>
-              <p class="track-artist">{{ song.streams }} streams</p>
-            </div>
-            <button class="add-to-favorites" data-song-id="{{ forloop.counter }}">
-              Add ❤️
-            </button>
-          </div>
-          {% empty %}
-          <p>No songs available.</p>
-          {% endfor %}
 
-        </ul>
-      </div>
-      <div class="now-playing-details">
-        <h3>Now Playing</h3>
-        <div class="track-details" id="now-playing-details">
-          <p>No song is currently playing.</p>
-        </div>
-        <div class="progress" id="progress-bar" style="display: none"></div>
-        <audio id="audio-player" controls style="width: 100%; display: none">
-          Your browser does not support the audio element.
-        </audio>
-        <div class="controls" id="controls" style="display: none">
-          <button id="prev-btn">⏮</button>
-          <button id="play-pause-btn">⏸</button>
-          <button id="next-btn">⏭</button>
+        <div id="top-songs-container">
+          <!-- Top songs will be inserted here -->
         </div>
       </div>
+
+
+        <div class="now-playing-details">
+          <h3>Now Playing</h3>
+          <div class="track-details" id="now-playing-details">
+            <p>No song is currently playing.</p>
+          </div>
+          <div class="progress" id="progress-bar" style="display: none"></div>
+          <audio id="audio-player" controls style="width: 100%; display: none">
+            Your browser does not support the audio element.
+          </audio>
+          <div class="controls" id="controls" style="display: none">
+            <button id="prev-btn">⏮</button>
+            <button id="play-pause-btn">⏸</button>
+            <button id="next-btn">⏭</button>
+          </div>
+        </div>
     </aside>
   </div>
 </body>
@@ -159,31 +147,68 @@
         });
     });
   });
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", function () {
+    const topSongsContainer = document.getElementById("top-songs-container");
+
+    // Fetch and render top songs
+    function fetchTopSongs() {
+      fetch("/top-songs/")
+        .then((response) => response.json())
+        .then((data) => {
+          const topSongs = data.songs;
+
+          // Clear the container
+          topSongsContainer.innerHTML = "";
+
+          if (topSongs.length > 0) {
+            topSongs.forEach((song) => {
+              const songElement = document.createElement("div");
+              songElement.classList.add("track");
+              songElement.setAttribute("data-song-title", song.song_title);
+              songElement.setAttribute("data-artist-name", song.artist_name);
+              songElement.style.backgroundColor = "#fff";  // Set a simple background color directly
+              songElement.style.padding = "15px";
+              songElement.style.display = "none";
+              songElement.offsetHeight; // Force reflow
+              songElement.style.display = "flex"; // Or any other valid display style
+
+
+              songElement.innerHTML = `
+                <!-- <img src="{% static 'images/image.png' %}" alt="${song.song_title}" class="album-art" /> -->
+                <div class="track-info">
+                  <p class="track-title">${song.song_title}</p>
+                  <p class="track-artist">${song.artist_name}</p>
+                  <p class="track-streams">${song.streams} streams</p>
+                </div>
+              `;
+
+
+              
+              // Add click event to play song
+              songElement.addEventListener("click", function () {
+                const songTitle = this.getAttribute("data-song-title");
+                const artistName = this.getAttribute("data-artist-name");
+                playSong(songTitle, artistName); // Call the original playSong function
+              });
+
+              topSongsContainer.appendChild(songElement);
+            });
+          } else {
+            topSongsContainer.innerHTML = "<p>No top songs available.</p>";
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching top songs:", error);
+          topSongsContainer.innerHTML =
+            "<p>Error loading songs. Please try again later.</p>";
+        });
+    }
+
+    // Initial Fetch
     fetchTopSongs();
   });
 
-  function fetchTopSongs() {
-    fetch("/top-songs/")
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.songs && data.songs.length > 0) {
-          const topSongsList = document.getElementById("top-songs-list");
-          topSongsList.innerHTML = ""; // Clear the list before adding new data
 
-          data.songs.forEach((song, index) => {
-            const listItem = document.createElement("li");
-            listItem.textContent = `${song.song_title} by ${song.artist_name} (${song.streams} streams)`;
-            topSongsList.appendChild(listItem);
-          });
-        } else {
-          console.log("No top songs available.");
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching top songs:", error);
-      });
-  }
 
   function playSong(songTitle, artistName) {
     const nowPlayingDetails = document.getElementById("now-playing-details");

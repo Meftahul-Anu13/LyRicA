@@ -417,52 +417,29 @@ def get_album_songs(request, album_id):
 
 @login_required
 def top_songs(request):
-    user = request.user
+    top_songs = Song.objects.select_related('artist').order_by('-streams')[:5]
+    print("Top Songs:", top_songs)
+    # return render(request, 'index2.html', {'top_songs': top_songs})
+    return JsonResponse({"songs": top_songs})
+@login_required
+def top_songs(request):
+    top_songs = Song.objects.select_related('artist').order_by('-streams')[:5]
+    songs_data = [
+        {
+            "song_id": song.id,
+            "song_title": song.title,
+            "artist_name": song.artist.name,
+            "streams": song.streams,
+        }
+        for song in top_songs
+    ]
+    return JsonResponse({"songs": songs_data})
 
+def increment_stream(request, song_id):
     try:
-        # # Get all listens by the user, ordered by the latest play time
-        # listens = Listen.objects.filter(user=user).order_by("-played_at")
-        
-        # # Deduplicate songs based on the highest play timestamp
-        # unique_songs = {}
-        # for listen in listens:
-        #     if listen.song.id not in unique_songs:
-        #         unique_songs[listen.song.id] = listen
-
-        # # Create a list of unique listens
-        # unique_listens = list(unique_songs.values())
-
-        # # Fetch additional data from the Song model and order by streams
-        # song_ids = [listen.song.id for listen in unique_listens]
-        # songs = (
-        #     Song.objects.filter(id__in=song_ids)
-        #     .order_by("-streams")[:5]  # Limit to top 5 streamed songs
-        # )
-
-        # # Format the data for JSON response
-        # top_songs = [
-        #     {
-        #         "song_id": song.id,
-        #         "song_title": song.title,
-        #         "artist_name": song.artist.name,
-        #         "streams": song.streams,
-        #     }
-        #     for song in songs
-        # ]
-        
-         # Fetch the top 5 songs ordered by streams
-        songs = Song.objects.all().order_by('-streams')[:5]
-
-        # Create a list of top songs data
-        top_songs = [
-            {
-                "song_title": song.title,
-                "artist_name": song.artist.name,
-                "streams": song.streams,
-            }
-            for song in songs
-        ]
-
-        return JsonResponse({"songs": top_songs})
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        song = Song.objects.get(id=song_id)
+        song.streams += 1
+        song.save()
+        return JsonResponse({"success": True, "streams": song.streams})
+    except Song.DoesNotExist:
+        return JsonResponse({"error": "Song not found"})
