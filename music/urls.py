@@ -63,6 +63,9 @@ urlpatterns = [
     path('favorites/', views.favorites, name='favorites'),
     path('top-songs/', views.top_songs, name='top_songs'),
     path('increment-stream/<int:song_id>/', views.increment_stream, name='increment_stream'),
+    path('profile/', views.profile_view, name='profile_view'),
+    path('logout/', views.logout_view, name='logout'),
+
 ]
 
 # Log the URL patterns

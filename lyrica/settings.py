@@ -91,7 +91,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Lyrica',
         'USER': 'postgres',
-        'PASSWORD': 'anu1311',  # Check this password
+        'PASSWORD': 'nabila',  # Check this password
         # 'HOST': '127.0.0.1',  # Or 'localhost'
         'HOST': 'localhost',
         'PORT': '5432',
@@ -161,5 +161,3 @@ load_dotenv()
 PCLOUD_USERNAME = os.getenv('PCLOUD_USERNAME')
 PCLOUD_PASSWORD = os.getenv('PCLOUD_PASSWORD')
 PCLOUD_MUSIC_FOLDER = os.getenv('PCLOUD_MUSIC_FOLDER')
-
-

@@ -12,6 +12,7 @@ from .forms import SignupForm
 from django.views.decorators.csrf import csrf_exempt    
 from dotenv import load_dotenv
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 from .models import Song,Artist,Favorites, Playlist, User,UserType,Album,Listen
 from .forms import LoginForm
 from django.contrib.auth.hashers import check_password 
@@ -68,10 +69,19 @@ def login_view(request):
 
     return render(request, 'login2.html', {'form': form})
 
+@login_required
+def logout_view(request):
+    logout(request)
+    messages.success(request, "You have been logged out successfully!")
+    return redirect('login')
+
 # Index view (Home page)
 def index(request):
     return render(request, 'index2.html')  # Assuming index.html is the homepage of your app
 
+@login_required
+def profile_view(request):
+    return render(request, 'account.html')
 
 # Authenticate with pCloud
 def authenticate_pcloud():
