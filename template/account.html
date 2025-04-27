@@ -22,7 +22,11 @@
         <img src="{% static 'images/account-icon.png' %}" alt="Profile Picture" class="profile-picture">
         <h2>{{ request.user.name }}</h2>
         <p><strong>Email:</strong> {{ request.user.email }}</p>
-        <p><strong>Account Type:</strong> {{ user_type }}</p>
+        <p><strong>Gender:</strong> {{ request.user.gender }}</p>
+        <p><strong>Country:</strong> {{ request.user.country }}</p>
+        <p><strong>Date of Birth:</strong> {{ request.user.date_of_birth|date:"F d, Y" }}</p>
+        <p><strong>Joined:</strong> {{ request.user.created_at|date:"F Y" }}</p>
+        <p><strong>Account Type:</strong> {{ request.user.user_type.user_type_name }}</p>
 
         <div class="profile-buttons">
             <a href="{% url 'edit_profile' %}" class="btn">✏️ Edit Profile</a>

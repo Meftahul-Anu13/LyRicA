@@ -35,6 +35,26 @@
       </div>
 
       <div class="form-group">
+        <label>Gender:</label>
+        <select name="gender">
+          <option value="">Select</option>
+          <option value="Male" {% if request.user.gender == "Male" %}selected{% endif %}>Male</option>
+          <option value="Female" {% if request.user.gender == "Female" %}selected{% endif %}>Female</option>
+          <option value="Other" {% if request.user.gender == "Other" %}selected{% endif %}>Other</option>
+        </select>
+      </div>
+  
+      <div class="form-group">
+        <label>Country:</label>
+        <input type="text" name="country" value="{{ request.user.country }}">
+      </div>
+  
+      <div class="form-group">
+        <label>Date of Birth:</label>
+        <input type="date" name="date_of_birth" value="{{ request.user.date_of_birth|date:'Y-m-d' }}">
+      </div>
+
+      <div class="form-group">
         <label for="password">New Password:</label>
         <input type="password" id="password" name="password">
         <br>

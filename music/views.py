@@ -86,12 +86,16 @@ def profile_view(request):
 
 @login_required
 def edit_profile(request):
+    user = request.user
+    
     if request.method == 'POST':
         name = request.POST.get('name')
         email = request.POST.get('email')
         password = request.POST.get('password')
+        user.gender = request.POST.get('gender')
+        user.country = request.POST.get('country')
+        user.date_of_birth = request.POST.get('date_of_birth')
 
-        user = request.user
         user.name = name
         user.email = email
 
