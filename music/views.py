@@ -18,6 +18,7 @@ from .forms import LoginForm
 from django.contrib.auth.hashers import check_password 
 from django.utils.timezone import now
 import logging
+from django.contrib.auth.hashers import make_password
 
 # Load environment variables
 load_dotenv()
@@ -82,6 +83,26 @@ def index(request):
 @login_required
 def profile_view(request):
     return render(request, 'account.html')
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        user = request.user
+        user.name = name
+        user.email = email
+
+        if password:
+            user.password = make_password(password)
+
+        user.save()
+        messages.success(request, "Profile updated successfully!")
+        return redirect('profile_view')
+
+    return render(request, 'edit_profile.html')
 
 # Authenticate with pCloud
 def authenticate_pcloud():

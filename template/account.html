@@ -14,9 +14,6 @@
   <div class="navbar-left">
     <a href="{% url 'index' %}" class="logo-text">LyRiCA</a>
   </div>
-  <div class="navbar-right">
-    <img src="{% static 'images/account-icon.png' %}" alt="Account" class="account-icon">
-  </div>
 </header>
 
 <!-- Profile Card -->
@@ -28,6 +25,8 @@
         <p><strong>Account Type:</strong> {{ user_type }}</p>
 
         <div class="profile-buttons">
+            <a href="{% url 'edit_profile' %}" class="btn">✏️ Edit Profile</a>
+
             <a href="{% url 'index' %}" class="btn">🏠 Back to Home</a>
             <a href="{% url 'logout' %}" class="btn logout-btn">🚪 Log Out</a>
         </div>
