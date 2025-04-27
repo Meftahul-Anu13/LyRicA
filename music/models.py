@@ -100,6 +100,10 @@ class SongRequest(models.Model):
     user = models.ForeignKey(User, related_name='requests', on_delete=models.CASCADE)
     admin = models.ForeignKey(User, related_name='admin_requests', on_delete=models.CASCADE)
     song_title = models.CharField(max_length=255)
+    album = models.CharField(max_length=255, blank=True, null=True)   # Add blank=True, null=True
+    artist = models.CharField(max_length=255, blank=True, null=True)   # Add blank=True, null=True
+    genre = models.CharField(max_length=100, blank=True, null=True)    # Add blank=True, null=True
+    release_year = models.IntegerField(blank=True, null=True)          # Add blank=True, null=True
     request_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=100)
 

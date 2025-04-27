@@ -66,6 +66,7 @@ urlpatterns = [
     path('profile/', views.profile_view, name='profile_view'),
     path('logout/', views.logout_view, name='logout'),
     path('edit-profile/', views.edit_profile, name='edit_profile'),
+    path('request-song/', views.request_song, name='request_song'),
 
 ]
 

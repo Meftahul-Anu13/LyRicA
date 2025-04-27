@@ -14,7 +14,7 @@
   <!-- Top Navbar -->
   <header class="navbar">
     <div class="navbar-left">
-      <a href="{% url 'index' %}" class="logo-text">LyRiCA</a>
+      <a href="{% url 'index' %}" class="logo-text">LyRicA</a>
     </div>
     <div class="navbar-right">
       <a href="{% url 'profile_view' %}">
@@ -59,6 +59,11 @@
           <li><a href="{% url 'signup' %}">Logout</a></li>
         </ul>
       </div>
+      {% if request.user.user_type.user_type_name == "User" %}
+<div class="request-song-container">
+  <a href="{% url 'request_song' %}" class="btn request-btn">🎵 Request a Song</a>
+</div>
+{% endif %}
     </aside>
 
     <!-- Main Content -->

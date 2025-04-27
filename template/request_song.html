@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request a Song</title>
+  <link rel="stylesheet" href="{% static 'styles.css' %}">
+  <style>
+    .profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* ⬅️ important! */
+  height: auto;
+  margin-top: 100px; /* 🛠 add space below navbar */
+  background-color: #f9f9f9;
+}
+  </style>
+</head>
+
+<body>
+
+<header class="navbar">
+  <div class="navbar-left">
+    <a href="{% url 'index' %}" class="logo-text">LyRicA</a>
+  </div>
+</header>
+
+<div class="profile-container">
+  <div class="profile-card">
+    <h2>🎵 Request a New Song</h2>
+
+    <!-- 🌟 Scrollable container starts -->
+    <div class="scrollable-card">
+      <form method="post">
+        {% csrf_token %}
+        <input type="text" name="song_title" placeholder="Song Title" required class="form-input"><br>
+        <input type="text" name="album" placeholder="Album Name" required class="form-input"><br>
+        <input type="text" name="artist" placeholder="Artist Name" required class="form-input"><br>
+        <input type="text" name="genre" placeholder="Genre" required class="form-input"><br>
+        <input type="number" name="release_year" placeholder="Release Year" required class="form-input"><br>
+        <button type="submit" class="btn">Submit Request</button>
+      </form>
+
+      <a href="{% url 'index' %}" class="btn logout-btn" style="margin-top: 10px;">⬅️ Back to Home</a>
+
+      <!-- ✨ Requested Songs List -->
+      {% if my_requests %}
+        <h3 style="margin-top: 30px;">📋 Your Song Requests</h3>
+        <div class="songs-dropdown">
+          {% for req in my_requests %}
+            <div style="margin-top: 15px; padding: 15px; background-color: #f5f6fa; border-radius: 10px; text-align: left;">
+              <p><strong>Title:</strong> {{ req.song_title }}</p>
+              <p><strong>Album:</strong> {{ req.album }}</p>
+              <p><strong>Artist:</strong> {{ req.artist }}</p>
+              <p><strong>Genre:</strong> {{ req.genre }}</p>
+              <p><strong>Release Year:</strong> {{ req.release_year }}</p>
+              <p><strong>Status:</strong> 
+                {% if req.status == "Pending" %}
+                  <span style="color: orange;">Pending</span>
+                {% elif req.status == "Approved" %}
+                  <span style="color: green;">Approved</span>
+                {% else %}
+                  <span style="color: red;">Rejected</span>
+                {% endif %}
+              </p>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p style="margin-top: 20px;">You have not requested any songs yet.</p>
+      {% endif %}
+    </div>
+    <!-- 🌟 Scrollable container ends -->
+
+  </div>
+</div>
+
+</body>
+</html>

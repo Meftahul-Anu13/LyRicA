@@ -19,6 +19,7 @@ from django.contrib.auth.hashers import check_password
 from django.utils.timezone import now
 import logging
 from django.contrib.auth.hashers import make_password
+from .models import SongRequest
 
 # Load environment variables
 load_dotenv()
@@ -87,7 +88,7 @@ def profile_view(request):
 @login_required
 def edit_profile(request):
     user = request.user
-    
+
     if request.method == 'POST':
         name = request.POST.get('name')
         email = request.POST.get('email')
@@ -107,6 +108,33 @@ def edit_profile(request):
         return redirect('profile_view')
 
     return render(request, 'edit_profile.html')
+
+@login_required
+def request_song(request):
+    if request.method == "POST":
+        song_title = request.POST.get('song_title')
+        album = request.POST.get('album')
+        artist = request.POST.get('artist')
+        genre = request.POST.get('genre')
+        release_year = request.POST.get('release_year')
+
+        SongRequest.objects.create(
+            user=request.user,
+            admin=User.objects.filter(user_type__user_type_name='Admin').first(),
+            song_title=song_title,
+            album=album,
+            artist=artist,
+            genre=genre,
+            release_year=release_year,
+            status="Pending",
+        )
+        messages.success(request, "🎵 Your song request has been submitted successfully!")
+        return redirect('request_song')  # Reload the same page to see the new request
+
+    # ✅ Fetch all requests by this user to display below the form
+    my_requests = SongRequest.objects.filter(user=request.user).order_by('-request_date')
+
+    return render(request, 'request_song.html', {'my_requests': my_requests})
 
 # Authenticate with pCloud
 def authenticate_pcloud():
