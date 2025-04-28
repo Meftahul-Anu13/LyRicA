@@ -1,0 +1,256 @@
+/* General Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f6f8;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Song List Page Styles */
+.song-list-container {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.song-header h2 {
+    font-size: 2.2em;
+    font-weight: 500;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Song Cards Grid */
+.song-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 cards per row by default */
+    gap: 20px;
+    justify-content: center;
+    padding: 10px;
+}
+
+/* For medium screens (tablets) */
+@media (max-width: 1024px) {
+    .song-cards {
+        grid-template-columns: repeat(3, 1fr); /* 3 cards per row */
+        justify-content: center; /* Center the content horizontally */
+    }
+}
+
+/* For smaller screens (mobile) */
+@media (max-width: 768px) {
+    .song-cards {
+        grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
+        justify-content: center; /* Center the content horizontally */
+    }
+}
+
+/* For very small screens (extra small mobile) */
+@media (max-width: 480px) {
+    .song-cards {
+        grid-template-columns: 1fr; /* 1 card per row */
+        justify-content: center; /* Center the content horizontally */
+    }
+}
+
+/* Song Card Styles */
+.song-card {
+    background-color: #ffffff;
+    max-width: 300px;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    justify-content: center;
+}
+
+.song-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.song-card .song-info {
+    margin-bottom: 20px;
+}
+
+.song-card .song-info h3 {
+    font-size: 1.4em;
+    margin-bottom: 15px;
+    color: #222;
+    font-weight: 500;
+}
+
+.song-card .song-info p {
+    font-size: 1.0em;
+    margin: 8px 0;
+}
+
+.song-card .song-info strong {
+    color: #007bff;
+    font-weight: 600;
+}
+
+.song-card .song-link {
+    color: #28a745;
+    text-decoration: underline;
+}
+
+.song-card .song-link:hover {
+    color: #218838;
+}
+
+.song-card .admin-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.song-card .admin-actions .btn-edit,
+.song-card .admin-actions .btn-delete {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 1.0em;
+    transition: background-color 0.3s ease;
+    width: 85px; /* Reduced button width */
+}
+
+.song-card .admin-actions .btn-edit:hover,
+.song-card .admin-actions .btn-delete:hover {
+    background-color: #0056b3;
+}
+
+.song-card .admin-actions .btn-delete {
+    background-color: #dc3545;
+}
+
+.song-card .admin-actions .btn-delete:hover {
+    background-color: #c82333;
+}
+
+.back-to-list {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.back-to-list .btn {
+    padding: 10px 25px;
+    background-color: #28a745;
+    color: #fff;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+}
+
+.back-to-list .btn:hover {
+    background-color: #218838;
+}
+
+/* Edit Song Page Styles */
+.edit-song-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 25px;
+    max-width: 700px; /* Reduced max-width for smaller form */
+    margin: 50px auto;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+    font-size: 2rem; /* Reduced font size */
+    margin-bottom: 20px;
+}
+
+.song-title {
+    color: #007bff;
+    font-weight: 600;
+}
+
+.edit-song-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.edit-song-form label {
+    font-weight: bold;
+    color: #555;
+}
+
+.edit-song-form input {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.edit-song-form input:focus {
+    border-color: #007bff;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.btn-save,
+.btn-cancel {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.btn-save {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+}
+
+.btn-save:hover {
+    background-color: #218838;
+}
+
+.btn-cancel {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.btn-cancel:hover {
+    background-color: #e0e0e0;
+}
+
+.btn-cancel:active {
+    background-color: #ccc;
+}

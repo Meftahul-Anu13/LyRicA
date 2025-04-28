@@ -91,7 +91,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Lyrica',
         'USER': 'postgres',
-        'PASSWORD': 'anu1311',  # Check this password
+        'PASSWORD': 'nabila',  # Check this password
         # 'HOST': '127.0.0.1',  # Or 'localhost'
         'HOST': 'localhost',
         'PORT': '5432',

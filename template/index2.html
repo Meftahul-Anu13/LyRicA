@@ -18,7 +18,7 @@
     </div>
     <div class="navbar-right">
       <a href="{% url 'profile_view' %}">
-        <img src="{G:\3-1\RDBMS\SOS\LyRicA\static\images\account.png}" alt="Account" class="account-icon">
+        <img src="{static\images\account.png}" alt="Account" class="account-icon">
       </a>
     </div>
   </header>
@@ -65,7 +65,7 @@
 </div>
 {% endif %}
 {% if request.user.user_type.user_type_name == "Admin" %}
-      <a href="{% url 'admin_view_song_requests' %}" class="btn blue-btn">Manage Requests</a>
+      <a href="{% url 'admin_view_song_requests' %}" class="btn blue-btn">Song Requests</a>
     {% endif %}
     </aside>
 

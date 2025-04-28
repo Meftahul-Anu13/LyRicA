@@ -219,7 +219,7 @@ def admin_dashboard(request):
 @login_required
 def view_songs(request):
     songs = Song.objects.all()
-    return render(request, 'songs_list.html', {'songs': songs})
+    return render(request, 'song_list_detail.html', {'songs': songs})
 
 # View all artists with their songs, albums, and genres
 @login_required
@@ -234,7 +234,7 @@ def view_artists(request):
             'genre': artist.genre.name,
         })
 
-    return render(request, 'artists_list.html', {'artists': artist_data})
+    return render(request, 'artists.html', {'artists': artist_data})
 
 # View all albums with their genres, artists, and songs
 @login_required
@@ -249,7 +249,7 @@ def view_albums(request):
             'songs': album.song_set.all(),
         })
 
-    return render(request, 'albums_list.html', {'albums': album_data})
+    return render(request, 'album.html', {'albums': album_data})
 
 # View all genres with their artists, albums, and songs
 @login_required
@@ -266,11 +266,18 @@ def view_genres(request):
 
     return render(request, 'genres_list.html', {'genres': genre_data})
 
+# View all songs
+@login_required
+def view_songs(request):
+    songs = Song.objects.all()  # Fetch all songs
+    return render(request, 'song_list_detail.html', {'songs': songs})
+
+
 # Song details
 @login_required
 def song_detail(request, song_id):
     song = get_object_or_404(Song, id=song_id)
-    return render(request, 'song_detail.html', {'song': song})
+    return render(request, 'song_list_detail.html', {'song': song})
 
 # Increment song streams (for "Now Playing")
 @login_required
@@ -282,6 +289,43 @@ def increment_stream(request, song_id):
         return JsonResponse({"success": True, "streams": song.streams})
     except Song.DoesNotExist:
         return JsonResponse({"error": "Song not found"}, status=404)
+    
+# Edit Song View
+@login_required
+def edit_song(request, song_id):
+    song = get_object_or_404(Song, id=song_id)
+
+    if request.method == 'POST':
+        # Save the form data to the song instance
+        song.title = request.POST['title']
+        song.artist.name = request.POST['artist']
+        song.album.title = request.POST['album']
+        song.genre.name = request.POST['genre']
+        song.released_year = request.POST['released_year']
+        song.duration = request.POST['duration']
+        
+        # Save the updated song to the database
+        song.save()
+        song.artist.save()  # Save artist if changes were made
+        song.album.save()   # Save album if changes were made
+        song.genre.save()   # Save genre if changes were made
+        
+        return redirect('view_songs')  # Redirect to the songs list page
+
+    # Render the edit song form if it's a GET request
+    return render(request, 'edit_song.html', {'song': song})
+
+# Delete Song View
+@login_required
+def delete_song(request, song_id):
+    song = get_object_or_404(Song, id=song_id)
+
+    # Delete the song
+    song.delete()
+
+    # Redirect to the songs list after deletion
+    return redirect('view_songs')
+
 
 # Authenticate with pCloud
 def authenticate_pcloud():

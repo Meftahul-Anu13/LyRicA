@@ -78,7 +78,9 @@ urlpatterns = [
     path('profile/dashboard/albums/', views.view_albums, name='view_albums'),
     path('profile/dashboard/genres/', views.view_genres, name='view_genres'),
 
-    path('profile/song/<int:song_id>/', views.song_detail, name='song_detail'),
+    path('profile/dashboard/songs/<int:song_id>/', views.song_detail, name='song_list_detail'),
+    path('profile/dashboard/songs/edit/<int:song_id>/', views.edit_song, name='edit_song'),
+    path('profile/dashboard/songs/delete/<int:song_id>/', views.delete_song, name='delete_song'),
     path('song/increment-stream/<int:song_id>/', views.increment_stream, name='increment_stream'),
 ]
 
