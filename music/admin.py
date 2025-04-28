@@ -1,16 +1,22 @@
-# music/admin.py
-
 from django.contrib import admin
 from .models import UserType, User, Genre, Artist, Album, Song, Playlist, SongRequest, Listen, Favorites, PlaylistSong
 
-admin.site.register(UserType)
-admin.site.register(User)
-admin.site.register(Genre)
-admin.site.register(Artist)
-admin.site.register(Album)
-admin.site.register(Song)
-admin.site.register(Playlist)
-admin.site.register(SongRequest)
-admin.site.register(Listen)
-admin.site.register(Favorites)
-admin.site.register(PlaylistSong)
+# Create a custom AdminSite class
+class MyAdminSite(admin.AdminSite):
+    final_catch_all_view = False  # Disable the default catch-all view
+
+# Create an instance of the custom admin site
+admin_site = MyAdminSite(name='myadmin')
+
+# Register your models with the custom admin site
+admin_site.register(UserType)
+admin_site.register(User)
+admin_site.register(Genre)
+admin_site.register(Artist)
+admin_site.register(Album)
+admin_site.register(Song)
+admin_site.register(Playlist)
+admin_site.register(SongRequest)
+admin_site.register(Listen)
+admin_site.register(Favorites)
+admin_site.register(PlaylistSong)

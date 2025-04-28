@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Song Requests</title>
+  <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="navbar-left">
+    <a href="{% url 'index' %}" class="logo-text">LyRiCA</a>
+  </div>
+</header>
+
+<div class="profile-container">
+  <div class="profile-card">
+    <h2>📋 Manage Song Requests</h2>
+
+    {% for request in song_requests %}
+      <div style="margin-top: 15px; padding: 15px; background-color: #f5f6fa; border-radius: 10px; text-align: left;">
+        <p><strong>Song Title:</strong> {{ request.song_title }}</p>
+        <p><strong>Album:</strong> {{ request.album }}</p>
+        <p><strong>Artist:</strong> {{ request.artist }}</p>
+        <p><strong>Genre:</strong> {{ request.genre }}</p>
+        <p><strong>Release Year:</strong> {{ request.release_year }}</p>
+        <p><strong>Status:</strong> 
+          {% if request.status == "Pending" %}
+            <span style="color: orange;">Pending</span>
+          {% elif request.status == "Approved" %}
+            <span style="color: green;">Approved</span>
+          {% else %}
+            <span style="color: red;">Rejected</span>
+          {% endif %}
+        </p>
+
+        {% if request.status == "Pending" %}
+          <form method="post" action="{% url 'admin_upload_song' request.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn blue-btn" style="margin-top:10px;">✅ Upload & Approve</button>
+          </form>
+
+          <form method="post" action="{% url 'reject_song_request' request.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn logout-btn" style="margin-top:10px;">❌ Reject</button>
+          </form>
+        {% endif %}
+      </div>
+    {% empty %}
+      <p>No song requests available.</p>
+    {% endfor %}
+
+    <a href="{% url 'index' %}" class="btn logout-btn" style="margin-top: 20px;">⬅️ Back to Home</a>
+
+  </div>
+</div>
+
+</body>
+</html>

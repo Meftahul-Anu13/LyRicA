@@ -30,7 +30,9 @@
 
         <div class="profile-buttons">
             <a href="{% url 'edit_profile' %}" class="btn">✏️ Edit Profile</a>
-
+            {% if request.user.user_type.user_type_name == "Admin" %}
+            <a href="{% url 'admin_dashboard' %}" class="btn">🛠️ Dashboard</a>
+            {% endif %}        
             <a href="{% url 'index' %}" class="btn">🏠 Back to Home</a>
             <a href="{% url 'logout' %}" class="btn logout-btn">🚪 Log Out</a>
         </div>

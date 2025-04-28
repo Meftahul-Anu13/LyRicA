@@ -64,6 +64,9 @@
   <a href="{% url 'request_song' %}" class="btn request-btn">🎵 Request a Song</a>
 </div>
 {% endif %}
+{% if request.user.user_type.user_type_name == "Admin" %}
+      <a href="{% url 'admin_view_song_requests' %}" class="btn blue-btn">Manage Requests</a>
+    {% endif %}
     </aside>
 
     <!-- Main Content -->

@@ -35,6 +35,8 @@ class User(AbstractBaseUser):
     created_at = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(null=True, blank=True)
     user_type = models.ForeignKey(UserType, on_delete=models.CASCADE)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
 
     # Define USERNAME_FIELD and REQUIRED_FIELDS
     USERNAME_FIELD = 'email'  # Use email as the unique identifier

@@ -68,6 +68,18 @@ urlpatterns = [
     path('edit-profile/', views.edit_profile, name='edit_profile'),
     path('request-song/', views.request_song, name='request_song'),
 
+    path('view-song-requests/', views.admin_view_song_requests, name='admin_view_song_requests'),
+    path('upload-song/<int:id>/', views.admin_upload_song, name='admin_upload_song'),
+    path('reject-request/<int:id>/', views.reject_song_request, name='reject_song_request'),
+
+    path('profile/dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('profile/dashboard/songs/', views.view_songs, name='view_songs'),
+    path('profile/dashboard/artists/', views.view_artists, name='view_artists'),
+    path('profile/dashboard/albums/', views.view_albums, name='view_albums'),
+    path('profile/dashboard/genres/', views.view_genres, name='view_genres'),
+
+    path('profile/song/<int:song_id>/', views.song_detail, name='song_detail'),
+    path('song/increment-stream/<int:song_id>/', views.increment_stream, name='increment_stream'),
 ]
 
 # Log the URL patterns

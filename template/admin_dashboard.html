@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard | Lyrica</title>
+  <link rel="stylesheet" href="{% static 'admin_dashboard.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="pixel-window">
+    <div class="pixel-header">
+      <span class="pixel-title">🎧 ADMIN DASHBOARD</span>
+    </div>
+
+    <div class="pixel-content">
+      <p>> Welcome, <span class="highlight">{{ request.user.name }}</span></p>
+
+      <div class="dashboard-boxes">
+        <div class="dashboard-box" onclick="location.href='{% url 'view_songs' %}'">
+          <p>Total Songs: <span class="highlight">{{ total_songs }}</span></p>
+        </div>
+        <div class="dashboard-box" onclick="location.href='{% url 'view_artists' %}'">
+          <p>Total Artists: <span class="highlight">{{ total_artists }}</span></p>
+        </div>
+        <div class="dashboard-box" onclick="location.href='{% url 'view_albums' %}'">
+          <p>Total Albums: <span class="highlight">{{ total_albums }}</span></p>
+        </div>
+        <div class="dashboard-box" onclick="location.href='{% url 'view_genres' %}'">
+          <p>Total Genres: <span class="highlight">{{ total_genres }}</span></p>
+        </div>
+      </div>
+            
+
+      {% if is_admin %}
+        <div class="pixel-buttons">
+         
+        </div>
+      {% else %}
+        <p style="color: red;">You are not an Admin. Please contact support.</p>
+      {% endif %}
+      
+    </div>
+  </div>
+</body>
+</html>

@@ -19,7 +19,8 @@ from django.contrib.auth.hashers import check_password
 from django.utils.timezone import now
 import logging
 from django.contrib.auth.hashers import make_password
-from .models import SongRequest
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import SongRequest, Song, Album, Artist, Genre
 
 # Load environment variables
 load_dotenv()
@@ -135,6 +136,152 @@ def request_song(request):
     my_requests = SongRequest.objects.filter(user=request.user).order_by('-request_date')
 
     return render(request, 'request_song.html', {'my_requests': my_requests})
+
+@login_required
+def admin_view_song_requests(request):
+    if request.user.user_type.user_type_name != "Admin":
+        return redirect('index')  # Not allowed if not Admin
+
+    song_requests = SongRequest.objects.all().order_by('-request_date')
+    return render(request, 'admin_view_song_requests.html', {'song_requests': song_requests})
+
+@login_required
+def admin_upload_song(request, id):
+    song_request = get_object_or_404(SongRequest, id=id)
+
+    if request.method == 'POST':
+        # Auto-create Song from request
+        title = song_request.song_title
+        album_name = song_request.album
+        artist_name = song_request.artist
+        genre_name = song_request.genre
+        release_year = song_request.release_year
+
+        album = Album.objects.filter(title=album_name).first()
+        artist = Artist.objects.filter(name=artist_name).first()
+        genre = Genre.objects.filter(name=genre_name).first()
+
+        if not (album and artist and genre):
+            messages.error(request, "Album, Artist, or Genre does not exist. Please create them first.")
+            return redirect('admin_view_song_requests')
+
+        Song.objects.create(
+            title=title,
+            album=album,
+            artist=artist,
+            genre=genre,
+            duration=0,  # Duration will be updated later
+            file_url='pending_upload',  # File to be uploaded manually later
+            released_year=release_year,
+            released_month=1,
+            released_day=1,
+            admin=request.user,
+        )
+
+        song_request.status = 'Approved'
+        song_request.save()
+
+        messages.success(request, "Song created and request approved.")
+        return redirect('admin_view_song_requests')
+
+@login_required
+def reject_song_request(request, id):
+    song_request = get_object_or_404(SongRequest, id=id)
+
+    if request.method == 'POST':
+        song_request.status = 'Rejected'
+        song_request.save()
+        messages.success(request, "Song request rejected.")
+        return redirect('admin_view_song_requests')
+    
+# Admin Dashboard View
+@login_required
+def admin_dashboard(request):
+    # Fetch totals for songs, artists, albums, and genres
+    total_songs = Song.objects.count()
+    total_artists = Artist.objects.count()
+    total_albums = Album.objects.count()
+    total_genres = Genre.objects.count()
+
+    # Check if the user is an admin
+    is_admin = request.user.is_superuser
+
+    context = {
+        'total_songs': total_songs,
+        'total_artists': total_artists,
+        'total_albums': total_albums,
+        'total_genres': total_genres,
+        'is_admin': is_admin
+    }
+    return render(request, 'admin_dashboard.html', context)
+
+# View all songs
+@login_required
+def view_songs(request):
+    songs = Song.objects.all()
+    return render(request, 'songs_list.html', {'songs': songs})
+
+# View all artists with their songs, albums, and genres
+@login_required
+def view_artists(request):
+    artists = Artist.objects.all()
+    artist_data = []
+    for artist in artists:
+        artist_data.append({
+            'name': artist.name,
+            'songs': artist.song_set.all(),
+            'albums': artist.album_set.all(),
+            'genre': artist.genre.name,
+        })
+
+    return render(request, 'artists_list.html', {'artists': artist_data})
+
+# View all albums with their genres, artists, and songs
+@login_required
+def view_albums(request):
+    albums = Album.objects.all()
+    album_data = []
+    for album in albums:
+        album_data.append({
+            'title': album.title,
+            'genre': album.genre.name,
+            'artist': album.artist.name,
+            'songs': album.song_set.all(),
+        })
+
+    return render(request, 'albums_list.html', {'albums': album_data})
+
+# View all genres with their artists, albums, and songs
+@login_required
+def view_genres(request):
+    genres = Genre.objects.all()
+    genre_data = []
+    for genre in genres:
+        genre_data.append({
+            'name': genre.name,
+            'artists': genre.artist_set.all(),
+            'albums': genre.album_set.all(),
+            'songs': genre.song_set.all(),
+        })
+
+    return render(request, 'genres_list.html', {'genres': genre_data})
+
+# Song details
+@login_required
+def song_detail(request, song_id):
+    song = get_object_or_404(Song, id=song_id)
+    return render(request, 'song_detail.html', {'song': song})
+
+# Increment song streams (for "Now Playing")
+@login_required
+def increment_stream(request, song_id):
+    try:
+        song = Song.objects.get(id=song_id)
+        song.streams += 1
+        song.save()
+        return JsonResponse({"success": True, "streams": song.streams})
+    except Song.DoesNotExist:
+        return JsonResponse({"error": "Song not found"}, status=404)
 
 # Authenticate with pCloud
 def authenticate_pcloud():
