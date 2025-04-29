@@ -6,6 +6,33 @@
   <title>Admin Dashboard | Lyrica</title>
   <link rel="stylesheet" href="{% static 'admin_dashboard.css' %}">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    .back-button .btn {
+    padding: 12px 25px;
+    background-color: #007bff; /* Elegant blue background */
+    color: white; /* White text */
+    text-align: center;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease; /* Smooth transition for hover effect */
+    border: 1px solid transparent; /* No border by default */
+    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2); /* Slight shadow for elegance */
+  }
+  
+  .back-button .btn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    color: #f8f9fa; /* Slightly lighter text on hover */
+    box-shadow: 0 6px 8px rgba(0, 86, 179, 0.3); /* More prominent shadow on hover */
+  }
+  
+  .back-button .btn:active {
+    background-color: #004085; /* Even darker blue when clicked */
+    box-shadow: 0 4px 6px rgba(0, 86, 179, 0.4); /* Slightly more shadow on click */
+  }
+  </style>
 </head>
 <body>
   <div class="pixel-window">
@@ -18,17 +45,20 @@
 
       <div class="dashboard-boxes">
         <div class="dashboard-box" onclick="location.href='{% url 'view_songs' %}'">
-          <p>Total Songs: <span class="highlight">{{ total_songs }}</span></p>
+          <p>All Songs <span class="highlight">{{ total_songs }}</span></p>
         </div>
         <div class="dashboard-box" onclick="location.href='{% url 'view_artists' %}'">
-          <p>Total Artists: <span class="highlight">{{ total_artists }}</span></p>
+          <p>All Artists <span class="highlight">{{ total_artists }}</span></p>
         </div>
         <div class="dashboard-box" onclick="location.href='{% url 'view_albums' %}'">
-          <p>Total Albums: <span class="highlight">{{ total_albums }}</span></p>
+          <p>All Albums <span class="highlight">{{ total_albums }}</span></p>
         </div>
         <div class="dashboard-box" onclick="location.href='{% url 'view_genres' %}'">
-          <p>Total Genres: <span class="highlight">{{ total_genres }}</span></p>
+          <p>All Genres <span class="highlight">{{ total_genres }}</span></p>
         </div>
+      </div>
+      <div class="back-button">
+        <a href="{% url 'index' %}" class="btn">Back to Home</a>
       </div>
             
 

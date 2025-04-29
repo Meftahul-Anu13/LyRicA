@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>All Artists | Lyrica</title>
+  <link rel="stylesheet" href="{% static 'artist.css' %}">
+</head>
+<body>
+  <div class="pixel-window">
+    <div class="pixel-header">
+      <span class="pixel-title">🎧 All Artists</span>
+    </div>
+
+    <div class="pixel-content">
+      <div class="artist-cards-container">
+        {% for artist in artists %}
+          <div class="artist-card">
+            <h2 class="artist-name">{{ artist.name }}</h2>
+            <p><strong>Bio:</strong> {{ artist.bio }}</p>
+            <p><strong>Followers:</strong> {{ artist.followers }}</p>
+            <p><strong>Genre:</strong> {{ artist.genre }}</p>
+            <p><strong>Total Streams:</strong> {{ artist.streams }}</p>
+            
+            <div class="artist-details">
+              <div class="songs-list">
+                <h3>Songs:</h3>
+                <ul>
+                  {% for song in artist.songs %}
+                    <li>{{ song.title }} - {{ song.duration }} seconds</li>
+                  {% endfor %}
+                </ul>
+              </div>
+              
+              <div class="albums-list">
+                <h3>Albums:</h3>
+                <ul>
+                  {% for album in artist.albums %}
+                    <li>{{ album.title }} - Released on: {{ album.release_date }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="back-to-dashboard">
+        <a href="{% url 'admin_dashboard' %}" class="btn">↩️ Back to Dashboard</a>
+      </div>      
+  </div>
+</body>
+</html>

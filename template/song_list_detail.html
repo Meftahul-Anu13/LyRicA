@@ -9,42 +9,44 @@
 <body>
   <div class="songs-list-container">
     <h2>🎶 Songs List</h2>
-    
-    {% for song in songs %}
-    <div class="song-card">
-      <div class="song-header">
-        <h3>{{ song.title }}</h3>
-      </div>
-      
-      <div class="song-info">
-        <p><strong>Artist:</strong> {{ song.artist.name }}</p>
-        <p><strong>Album:</strong> {{ song.album.title }}</p>
-        <p><strong>Genre:</strong> {{ song.genre.name }}</p>
-        <p><strong>Release Year:</strong> {{ song.released_year }}</p>
-        <p><strong>Duration:</strong> {{ song.duration }} mins</p>
-        <p><strong>Streams:</strong> {{ song.streams }}</p>
-        <p><strong>File URL:</strong> <a href="{{ song.file_url }}" target="_blank">Listen</a></p>
-      </div>
 
-      {% if user.is_superuser %}
-      <div class="admin-actions">
-        <!-- Edit Song Button -->
-        <a href="{% url 'edit_song' song.id %}" class="btn-edit">✏️ Edit Song</a>
+    <!-- Song Cards Container -->
+    <div class="song-cards">
+      {% for song in songs %}
+      <div class="song-card">
+        <div class="song-header">
+          <h3>{{ song.title }}</h3>
+        </div>
         
-        <!-- Delete Song Button -->
-        <form method="POST" action="{% url 'delete_song' song.id %}" style="display:inline;">
-          {% csrf_token %}
-          <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete this song?')">🗑️ Delete Song</button>
-        </form>
+        <div class="song-info">
+          <p><strong>Artist:</strong> {{ song.artist.name }}</p>
+          <p><strong>Album:</strong> {{ song.album.title }}</p>
+          <p><strong>Genre:</strong> {{ song.genre.name }}</p>
+          <p><strong>Release Year:</strong> {{ song.released_year }}</p>
+          <p><strong>Duration:</strong> {{ song.duration }} seconds</p>
+          <p><strong>Streams:</strong> {{ song.streams }}</p>
+        </div>
+
+        {% if user.is_superuser %}
+        <div class="admin-actions">
+          <!-- Edit Song Button -->
+          <a href="{% url 'edit_song' song.id %}" class="btn-edit">✏️ Edit Song</a>
+          
+          <!-- Delete Song Button -->
+          <form method="POST" action="{% url 'delete_song' song.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete this song?')">🗑️ Delete Song</button>
+          </form>
+        </div>
+        {% endif %}
       </div>
-      {% endif %}
+      {% endfor %}
     </div>
-    {% endfor %}
 
     <!-- Back to Dashboard Button -->
     <div class="back-to-dashboard">
-      <a href="{% url 'admin_dashboard' %}" class="btn">↩️ Back to Dashboard</a>
-    </div>
+        <a href="{% url 'admin_dashboard' %}" class="btn">↩️ Back to Dashboard</a>
+      </div>
   </div>
 </body>
 </html>

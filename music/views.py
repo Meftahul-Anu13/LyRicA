@@ -221,7 +221,6 @@ def view_songs(request):
     songs = Song.objects.all()
     return render(request, 'song_list_detail.html', {'songs': songs})
 
-# View all artists with their songs, albums, and genres
 @login_required
 def view_artists(request):
     artists = Artist.objects.all()
@@ -229,12 +228,16 @@ def view_artists(request):
     for artist in artists:
         artist_data.append({
             'name': artist.name,
+            'bio': artist.bio,
+            'followers': artist.followers,
             'songs': artist.song_set.all(),
             'albums': artist.album_set.all(),
             'genre': artist.genre.name,
+            'streams': artist.streams,
         })
 
-    return render(request, 'artists.html', {'artists': artist_data})
+    return render(request, 'artist_list.html', {'artists': artist_data})
+
 
 # View all albums with their genres, artists, and songs
 @login_required
