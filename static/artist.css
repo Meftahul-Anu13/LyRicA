@@ -7,7 +7,7 @@ body {
     padding: 0;
     overflow-x: hidden; /* Prevent horizontal scrolling */
   }
-  
+
   /* Container for the Dashboard */
   .pixel-window {
     width: 100%;
@@ -38,6 +38,10 @@ body {
     border-radius: 8px;
     margin-top: 20px;
     box-sizing: border-box; /* Prevent width overflow */
+  }
+
+  .artist-name {
+    color: #4c6ef5;
   }
   
   /* Artist Cards Container */

@@ -261,15 +261,24 @@ def view_albums(request):
 def view_genres(request):
     genres = Genre.objects.all()
     genre_data = []
+    
     for genre in genres:
+        # Get unique artists for each genre using distinct
+        artists = genre.artist_set.all().distinct()
+
+        # Calculate total streams for the genre by summing up the streams of each song in the genre
+        total_streams = sum(song.streams for song in genre.song_set.all())
+
         genre_data.append({
             'name': genre.name,
-            'artists': genre.artist_set.all(),
-            'albums': genre.album_set.all(),
+            'artists': artists,
             'songs': genre.song_set.all(),
+            'total_streams': total_streams,
         })
 
     return render(request, 'genres_list.html', {'genres': genre_data})
+
+
 
 # View all songs
 @login_required

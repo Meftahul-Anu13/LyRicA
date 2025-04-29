@@ -23,6 +23,25 @@ body {
   button {
     cursor: pointer;
   }
+
+    /* Navbar Styles */
+.navbar {
+    background-color: #007bff; /* Blue background */
+    padding: 20px; /* Padding for spacing */
+    color: white; /* White text */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.5rem; /* Adjust font size */
+    font-weight: bold;
+    border-radius: 8px;
+    margin-bottom: 20px; /* Gap below the navbar */
+  }
+  
+  .logo-text {
+    color: white; /* Ensure the text is white */
+    text-decoration: none; /* Remove underline */
+  }
   
   /* Container for the Dashboard */
   .container {
@@ -44,10 +63,14 @@ body {
   
   /* Song Header */
   .song-header h2 {
+    background-color: #4c6ef5; /* Blue background */
+    padding: 20px;
+    color: white;
+    text-align: center;
+    border-radius: 8px;
     font-size: 2.2em;
     font-weight: 500;
-    margin-bottom: 20px;
-    color: #333;
+    margin-bottom: 40px;
   }
   
   /* Song Cards Grid */

@@ -558,6 +558,7 @@ body {
   text-decoration: none;
   border-radius: 8px;
   transition: background-color 0.3s;
+  text-align: center;
 }
 
 .action-btn:hover {
