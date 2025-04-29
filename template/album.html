@@ -8,6 +8,73 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lyrica Music Player</title>
   <link rel="stylesheet" href="{% static 'styles.css' %}" />
+  <style>
+    .navbar-right {
+      display: flex;
+      justify-content: flex-end; /* Aligns the content to the right */
+      margin-right: 2cm; /* Adds the 1-2 cm gap on the right */
+    }
+
+    .account-icon {
+      width: 40px; /* Set the size of the icon */
+      height: 40px; /* Set the size of the icon */
+      border-radius: 50%; /* Makes the icon appear circular */
+      background-color: white; /* Sets the background color to white */
+      padding: 5px; /* Adds some space inside the circle around the icon */
+      object-fit: cover; /* Ensures the image maintains its aspect ratio */
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Adds a subtle shadow to make it stand out */
+    }
+
+/* Dashboard Boxes Container */
+#dashboardBoxes {
+    display: none; /* Hidden by default */
+    margin-top: 20px;
+}
+
+/* Individual Dashboard Box Styles */
+.dashboard-box {
+    background-color: #4c6ef5;
+    text-align: center;
+    padding: 2px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+p.all{
+    font-size: 1rem;
+    color: #fff; /* White text for better contrast */
+}
+
+.dashboard-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Highlighting for numbers */
+.highlight {
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* Responsive Design for Small Screens */
+@media (max-width: 768px) {
+    .dashboard-box {
+        padding: 15px;
+    }
+    
+    li a {
+        font-size: 14px;
+        padding: 8px 15px;
+    }
+    
+    .highlight {
+        font-size: 16px;
+    }
+}
+  </style>
 </head>
 
 <body>
@@ -72,8 +139,8 @@
       <header>
         <h1>{% block title %}Albums {% endblock %}</h1>
         <div class="controls">
-          <button class="play">Play</button>
-          <button class="shuffle">Shuffle</button>
+          <!-- <button class="play">Play</button>
+          <button class="shuffle">Shuffle</button> -->
         </div>
       </header>
 
@@ -143,6 +210,7 @@
                 songElement.setAttribute("data-artist-name", song.artist_name);
                 songElement.style.backgroundColor = "#fff";  // Set a simple background color directly
                 songElement.style.padding = "15px";
+                songElement.style.marginBottom = "10px";
                 songElement.style.display = "none";
                 songElement.offsetHeight; // Force reflow
                 songElement.style.display = "flex"; // Or any other valid display style
@@ -153,7 +221,7 @@
                   <div class="track-info">
                     <p class="track-title">${song.song_title}</p>
                     <p class="track-artist">${song.artist_name}</p>
-                    <!-- <p class="track-streams">${song.streams} streams</p> -->
+                    <p class="track-streams">${song.streams} streams</p>
                   </div>
                 `;
   

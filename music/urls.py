@@ -87,6 +87,9 @@ urlpatterns = [
     path('artists/follow/<int:artist_id>/', views.follow_artist, name='follow_artist'),
     path('artists/unfollow/<int:artist_id>/', views.unfollow_artist, name='unfollow_artist'),
     path('artists/followed/', views.followed_artists, name='followed_artists'),
+    
+    path('/', views.shuffled_songs_view, name='shuffled_songs'),
+    path('my_music/shuffled/', views.shuffled_my_songs_view, name='shuffled_my_music'),
 ]
 
 # Log the URL patterns
