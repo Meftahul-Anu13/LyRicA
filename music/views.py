@@ -245,14 +245,16 @@ def view_albums(request):
     albums = Album.objects.all()
     album_data = []
     for album in albums:
+        total_streams = sum(song.streams for song in album.song_set.all())  # Sum streams of all songs in the album
         album_data.append({
             'title': album.title,
-            'genre': album.genre.name,
+            'release_date': album.release_date,
             'artist': album.artist.name,
             'songs': album.song_set.all(),
+            'total_streams': total_streams,  # Add total streams to album data
         })
 
-    return render(request, 'album.html', {'albums': album_data})
+    return render(request, 'album_list.html', {'albums': album_data})
 
 # View all genres with their artists, albums, and songs
 @login_required

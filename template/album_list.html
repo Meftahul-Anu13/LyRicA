@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Album Details | Lyrica</title>
+  <link rel="stylesheet" href="{% static 'album.css' %}">
+</head>
+<body>
+  <div class="album-window">
+    <div class="album-header">
+      <span class="album-title">🎧 Album Details</span>
+    </div>
+
+    <div class="album-content">
+      <div class="album-cards-container">
+        {% for album in albums %}
+          <div class="album-card">
+            <h2 class="album-title">{{ album.title }}</h2>
+            <p><strong>Artist:</strong> {{ album.artist }}</p>
+            <p><strong>Release Date:</strong> {{ album.release_date }}</p>
+            <p><strong>Total Streams:</strong> {{ album.total_streams }}</p>
+            
+            <div class="album-details">
+              <div class="songs-list">
+                <h3>Songs:</h3>
+                <ul style="list-style-type: square;">
+                  {% for song in album.songs %}
+                    <li>{{ song.title }} - {{ song.duration }} seconds</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="back-to-dashboard">
+        <a href="{% url 'admin_dashboard' %}" class="btn">Back to Dashboard</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
