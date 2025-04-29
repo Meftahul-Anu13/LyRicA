@@ -143,13 +143,13 @@ p.all{
           <li><a href="{% url 'signup' %}">Logout</a></li>
         </ul>
       </div>
-      {% if request.user.user_type.user_type_name == "User" %}
+      {% if request.user.user_type.user_type_name == "User"%}
 <div class="request-song-container">
   <a href="{% url 'request_song' %}" class="btn request-btn">🎵 Request a Song</a>
 </div>
 {% endif %}
 {% if request.user.user_type.user_type_name == "Admin" %}
-      <a href="{% url 'admin_view_song_requests' %}" class="btn blue-btn" style="text-align: center;">Song Requests</a>
+      <a href="{% url 'admin_view_song_requests' %}" class="btn blue-btn" style="text-align: center;">🎵 Song Requests</a>
     {% endif %}
     </aside>
 

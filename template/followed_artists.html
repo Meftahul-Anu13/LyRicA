@@ -7,36 +7,53 @@
   <link rel="stylesheet" href="{% static 'followed_artists.css' %}">
 </head>
 <body>
-  <!-- Navbar -->
-  <header class="navbar">
-    <div class="navbar-left">
-      <a href="{% url 'index' %}" class="logo-text">LyRicA</a>
-    </div>
-  </header>
+<header class="navbar">
+    <a href="{% url 'index' %}" class="logo-text">LyRicA</a>
+</header>
 
-  <!-- Main Content -->
-  <div class="followed-artists">
+<div class="followed-artists">
     <h2>Followed Artists</h2>
-    
-    <!-- Artists List -->
     <ul>
       {% for artist in followed_artists %}
         <li>
-          <span>{{ artist.name }}</span>
-          <form method="POST" action="{% url 'unfollow_artist' artist.id %}">
-            {% csrf_token %}
-            <button type="submit" class="unfollow-btn">Unfollow</button>
-          </form>
+          <strong>{{ artist.name }}</strong>
+          <button onclick="unfollowArtist({{ artist.id }}, '{{ artist.name }}')" class="btn-unfollow">Unfollow</button>
         </li>
       {% empty %}
-        <p>No followed artists yet.</p>
+        <p>You haven't followed any artists yet.</p>
       {% endfor %}
     </ul>
 
-    <!-- Back to Dashboard Button -->
-    <div class="back-to-dashboard">
-      <a href="{% url 'index' %}" class="btn">↩️ Back to Home</a>
-    </div>
-  </div>
+    <a href="{% url 'artist_list' %}" class="btn">← Back to Artists</a>
+</div>
+
+<script>
+  const csrfToken = '{{ csrf_token }}';
+
+  function unfollowArtist(artistId,artistName) {
+    if (confirm(`You have unfollowed artist ${artistName}`)) {
+      fetch(`/artists/unfollow/${artistId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          location.reload();
+          //document.getElementById(`artist-${artistId}`).remove();  // Remove artist from list
+        } else {
+          alert(data.message || 'Unfollow failed.');
+        }
+      })
+      .catch(err => {
+        console.error('Request failed', err);
+      });
+    }
+  }
+</script>
+
 </body>
 </html>

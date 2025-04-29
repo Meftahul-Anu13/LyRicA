@@ -1,0 +1,206 @@
+/* General Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f6f8;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+  }
+
+  /* Container for the Dashboard */
+  .pixel-window {
+    width: 100%;
+    padding: 20px;
+    margin-top: 70px; /* Adjusted margin to keep consistency with navbar */
+    box-sizing: border-box; /* Ensure padding doesn't add to width */
+  }
+  
+  /* Header Section */
+  .pixel-header {
+    background-color: #4c6ef5; /* Blue background */
+    padding: 20px;
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    box-sizing: border-box; /* Prevent width overflow */
+  }
+  
+  .pixel-title {
+    font-size: 2rem;
+    font-weight: bold;
+  }
+  
+  /* Content Area */
+  .pixel-content {
+    padding: 20px;
+    background-color: #F3F4F6; /* Light background */
+    border-radius: 8px;
+    margin-top: 20px;
+    box-sizing: border-box; /* Prevent width overflow */
+  }
+
+  .artist-name {
+    color: #4c6ef5;
+  }
+  
+  /* Artist Cards Container */
+  .artist-cards-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 cards per row */
+    gap: 20px;
+    justify-content: center; /* Center the content horizontally */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+  }
+  
+  /* Artist Card */
+  .artist-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .artist-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+  
+  .artist-card .artist-name {
+    font-size: 1.8em;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  
+  .artist-card p {
+    font-size: 1.1em;
+    margin: 10px 0;
+  }
+  
+  .artist-card .artist-details {
+    margin-top: 20px;
+  }
+  
+  .artist-card .songs-list, .artist-card .albums-list {
+    margin-bottom: 15px;
+  }
+  
+  .artist-card h3 {
+    font-size: 1.3em;
+    color: #333;
+  }
+  
+  .artist-card ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .artist-card li {
+    font-size: 1.0em;
+    margin-bottom: 8px;
+  }
+  
+  .artist-card .songs-list li, .artist-card .albums-list li {
+    background-color: #f0f4ff;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+  }
+  
+  /* Link Styles */
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  a:hover {
+    color: #4c6ef5;
+    text-decoration: none;
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 768px) {
+    .artist-cards-container {
+      grid-template-columns: repeat(2, 1fr); /* 2 cards per row on medium screens */
+    }
+  
+    .artist-card {
+      width: 100%; /* Full width for medium screens */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .artist-cards-container {
+      grid-template-columns: 1fr; /* 1 card per row on small screens */
+      align-items: center;
+    }
+  
+    .artist-card {
+      width: 100%; /* Full width for small screens */
+      margin-bottom: 20px; /* Space between cards */
+    }
+  }
+
+/* Follow / Unfollow Button Styles */
+.follow-btn,
+.unfollow-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.follow-btn:hover,
+.unfollow-btn:hover {
+  background-color: #0056b3;
+}
+
+.follow-btn:active,
+.unfollow-btn:active {
+  background-color: #004085;
+}
+
+/* Button Container Styles */
+.artist-card .follow-unfollow-btns {
+  display: flex;
+  gap: 10px;
+}
+  
+ /* Back to Dashboard Button */
+.back-to-dashboard {
+    display: flex;
+    justify-content: center;  /* Centers the button horizontally */
+    margin-top: 20px;  /* Adds space above the button */
+  }
+  
+  .back-to-dashboard .btn {
+    padding: 12px 25px;
+    background-color: #007bff; /* Elegant blue background */
+    color: white; /* White text */
+    text-align: center;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease; /* Smooth transition for hover effect */
+    border: 1px solid transparent; /* No border by default */
+    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2); /* Slight shadow for elegance */
+  }
+  
+  .back-to-dashboard .btn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    color: #f8f9fa; /* Slightly lighter text on hover */
+    box-shadow: 0 6px 8px rgba(0, 86, 179, 0.3); /* More prominent shadow on hover */
+  }
+  
+  .back-to-dashboard .btn:active {
+    background-color: #004085; /* Even darker blue when clicked */
+    box-shadow: 0 4px 6px rgba(0, 86, 179, 0.4); /* Slightly more shadow on click */
+  }
+  
