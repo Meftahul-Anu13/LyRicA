@@ -103,6 +103,21 @@ p.all{
             <a href="javascript:void(0)" onclick="toggleDashboardBoxes()">Explore</a>
         </li>
         
+        <div id="dashboardBoxes" class="dashboard-boxes" style="display: none;">
+          <div class="dashboard-box" onclick="location.href='{% url 'view_songs' %}'">
+              <p class="all">All Songs <span class="highlight">{{ total_songs }}</span></p>
+          </div>
+          <div class="dashboard-box" onclick="location.href='{% url 'view_artists' %}'">
+              <p class="all">All Artists <span class="highlight">{{ total_artists }}</span></p>
+          </div>
+          <div class="dashboard-box" onclick="location.href='{% url 'view_albums' %}'">
+              <p class="all">All Albums <span class="highlight">{{ total_albums }}</span></p>
+          </div>
+          <div class="dashboard-box" onclick="location.href='{% url 'view_genres' %}'">
+              <p class="all">All Genres <span class="highlight">{{ total_genres }}</span></p>
+          </div>
+      </div>
+      
           <li class="{% if request.path == '/song_list/' %}active{% endif %}">
             <a href="{% url 'song_list' %}">Search</a>
           </li>
