@@ -1,5 +1,8 @@
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 # urlpatterns = [
 #     # path('dashboard/', views.dashboard_view, name='dashboard'),
@@ -69,8 +72,8 @@ urlpatterns = [
     path('request-song/', views.request_song, name='request_song'),
 
     path('view-song-requests/', views.admin_view_song_requests, name='admin_view_song_requests'),
-    path('upload-song/<int:id>/', views.admin_upload_song, name='admin_upload_song'),
-    path('reject-request/<int:id>/', views.reject_song_request, name='reject_song_request'),
+    path('view-song-requests/upload-song/<int:id>/', views.admin_upload_song, name='admin_upload_song'),
+    path('view-song-requests/reject-request/<int:id>/', views.reject_song_request, name='reject_song_request'),
 
     path('profile/dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('profile/dashboard/songs/', views.view_songs, name='view_songs'),
@@ -86,7 +89,7 @@ urlpatterns = [
     path('profile/dashboard/artists/unfollow-artist/<int:artist_id>/', views.unfollow_artist, name='unfollow_artist'),
 
     path('followed-artists/', views.followed_artists, name='followed_artists'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Log the URL patterns
 logger.info('URL patterns loaded')

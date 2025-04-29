@@ -100,8 +100,12 @@ p.all{
             <a href="{% url 'index' %}">Discover</a>
           </li>
           <li class="{% if request.path == '/explore/' %}active{% endif %}">
-            <a href="javascript:void(0)" onclick="toggleDashboardBoxes()">Explore</a>
-        </li>
+            {% if request.user.user_type.user_type_name == 'User' %}
+                <a href="javascript:void(0)" onclick="toggleDashboardBoxes()">Explore</a>
+            {% else %}
+                <span>Explore</span> <!-- Non-users can't click -->
+            {% endif %}
+          </li>
         
         <div id="dashboardBoxes" class="dashboard-boxes" style="display: none;">
           <div class="dashboard-box" onclick="location.href='{% url 'view_songs' %}'">
@@ -117,7 +121,7 @@ p.all{
               <p class="all">All Genres <span class="highlight">{{ total_genres }}</span></p>
           </div>
       </div>
-      
+
           <li class="{% if request.path == '/song_list/' %}active{% endif %}">
             <a href="{% url 'song_list' %}">Search</a>
           </li>

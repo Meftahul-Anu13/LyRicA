@@ -107,6 +107,11 @@ AUTH_USER_MODEL='music.User'
 
 
 
+# Add the following lines for media file handling
+MEDIA_URL = '/media/'  # URL where media files can be accessed
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Directory where files will be stored
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -161,3 +166,4 @@ load_dotenv()
 PCLOUD_USERNAME = os.getenv('PCLOUD_USERNAME')
 PCLOUD_PASSWORD = os.getenv('PCLOUD_PASSWORD')
 PCLOUD_MUSIC_FOLDER = os.getenv('PCLOUD_MUSIC_FOLDER')
+PCLOUD_API_BASE_URL = 'https://api.pcloud.com'  # This is the base URL for the pCloud API.

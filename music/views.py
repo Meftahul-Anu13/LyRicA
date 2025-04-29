@@ -1,6 +1,5 @@
 import os
 import requests
-from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib import messages
@@ -21,6 +20,12 @@ import logging
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import SongRequest, Song, Album, Artist, Genre, ArtistFollow
+from .utils import upload_to_pcloud
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.core.files.storage import FileSystemStorage
+from django.conf import settings
+
 
 # Load environment variables
 load_dotenv()
@@ -145,44 +150,45 @@ def admin_view_song_requests(request):
     song_requests = SongRequest.objects.all().order_by('-request_date')
     return render(request, 'admin_view_song_requests.html', {'song_requests': song_requests})
 
+
 @login_required
 def admin_upload_song(request, id):
     song_request = get_object_or_404(SongRequest, id=id)
 
     if request.method == 'POST':
-        # Auto-create Song from request
-        title = song_request.song_title
-        album_name = song_request.album
-        artist_name = song_request.artist
-        genre_name = song_request.genre
-        release_year = song_request.release_year
+        mp3_file = request.FILES['mp3_file']
 
-        album = Album.objects.filter(title=album_name).first()
-        artist = Artist.objects.filter(name=artist_name).first()
-        genre = Genre.objects.filter(name=genre_name).first()
+        if mp3_file:
+            # Set the file storage path
+            file_storage = FileSystemStorage(location=settings.MEDIA_ROOT)
+            
+            # Save the file to the defined MEDIA_ROOT directory
+            filename = file_storage.save(mp3_file.name, mp3_file)
+            file_url = file_storage.url(filename)  # Get the URL of the file
 
-        if not (album and artist and genre):
-            messages.error(request, "Album, Artist, or Genre does not exist. Please create them first.")
+            # Debugging: Check if the file is saved
+            print(f"File uploaded and saved as: {filename}")
+            print(f"File is accessible at: {file_url}")
+
+            # Now upload the file to pCloud
+            # Pass the mp3_file directly instead of the filename string
+            file_url_pcloud = upload_to_pcloud(mp3_file)
+
+            if file_url_pcloud:
+                # Update SongRequest status to 'Approved' after successful upload
+                song_request.status = 'Approved'  # Update status to 'Approved'
+                song_request.file_url = file_url_pcloud  # Save the pCloud URL
+                song_request.save()  # Save the changes
+
+                messages.success(request, "Song uploaded successfully and uploaded to pCloud.")
+                return redirect('admin_view_song_requests')
+            else:
+                messages.error(request, "Failed to upload to pCloud.")
+                return redirect('admin_view_song_requests')
+        else:
+            messages.error(request, "No MP3 file uploaded.")
             return redirect('admin_view_song_requests')
 
-        Song.objects.create(
-            title=title,
-            album=album,
-            artist=artist,
-            genre=genre,
-            duration=0,  # Duration will be updated later
-            file_url='pending_upload',  # File to be uploaded manually later
-            released_year=release_year,
-            released_month=1,
-            released_day=1,
-            admin=request.user,
-        )
-
-        song_request.status = 'Approved'
-        song_request.save()
-
-        messages.success(request, "Song created and request approved.")
-        return redirect('admin_view_song_requests')
 
 @login_required
 def reject_song_request(request, id):

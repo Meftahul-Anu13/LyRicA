@@ -108,6 +108,7 @@ class SongRequest(models.Model):
     release_year = models.IntegerField(blank=True, null=True)          # Add blank=True, null=True
     request_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=100)
+    file_url = models.URLField(blank=True, null=True)  # Add file_url to store the pCloud file URL
 
     def __str__(self):
         return f"{self.song_title} by {self.user.name}"

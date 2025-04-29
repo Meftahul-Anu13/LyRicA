@@ -1,24 +1,35 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Manage Song Requests</title>
   <link rel="stylesheet" href="{% static 'styles.css' %}">
+  <style>
+    .profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* ⬅️ important! */
+  height: auto;
+  margin-top: 100px; /* 🛠 add space below navbar */
+  background-color: #f9f9f9;
+}
+  </style>
 </head>
 <body>
 
-<header class="navbar">
-  <div class="navbar-left">
-    <a href="{% url 'index' %}" class="logo-text">LyRiCA</a>
-  </div>
-</header>
-
-<div class="profile-container">
-  <div class="profile-card">
-    <h2>📋 Manage Song Requests</h2>
-
-    {% for request in song_requests %}
+  <header class="navbar">
+    <div class="navbar-left">
+      <a href="{% url 'index' %}" class="logo-text">LyRiCA</a>
+    </div>
+  </header>
+  
+  <div class="profile-container">
+    <div class="profile-card">
+      <h2>📋 Manage Song Requests</h2>
+  
+      {% for request in song_requests %}
       <div style="margin-top: 15px; padding: 15px; background-color: #f5f6fa; border-radius: 10px; text-align: left;">
         <p><strong>Song Title:</strong> {{ request.song_title }}</p>
         <p><strong>Album:</strong> {{ request.album }}</p>
@@ -34,13 +45,15 @@
             <span style="color: red;">Rejected</span>
           {% endif %}
         </p>
-
+    
         {% if request.status == "Pending" %}
-          <form method="post" action="{% url 'admin_upload_song' request.id %}" style="display:inline;">
+          <form id="upload-form-{{ request.id }}" method="post" action="{% url 'admin_upload_song' request.id %}" enctype="multipart/form-data" style="display:inline;" onsubmit="hideForm('upload-form-{{ request.id }}', '{{ request.id }}')">
             {% csrf_token %}
+            <label for="mp3_file">Upload MP3:</label>
+            <input type="file" name="mp3_file" accept="audio/mp3" required>
             <button type="submit" class="btn blue-btn" style="margin-top:10px;">✅ Upload & Approve</button>
           </form>
-
+    
           <form method="post" action="{% url 'reject_song_request' request.id %}" style="display:inline;">
             {% csrf_token %}
             <button type="submit" class="btn logout-btn" style="margin-top:10px;">❌ Reject</button>
@@ -50,11 +63,27 @@
     {% empty %}
       <p>No song requests available.</p>
     {% endfor %}
-
-    <a href="{% url 'index' %}" class="btn logout-btn" style="margin-top: 20px;">⬅️ Back to Home</a>
-
+    
+    <script>
+      // JavaScript to hide the form and reject button after submission
+      function hideForm(formId, requestId) {
+        // Hide the form and reject button
+        var form = document.getElementById(formId);
+        var rejectButton = document.getElementById('reject-form-' + requestId);
+        
+        if (form && rejectButton) {
+          form.style.display = 'none';  // Hide the form
+          rejectButton.style.display = 'none';  // Hide the reject button
+        }
+      }
+    </script>
+    
+    
+      <a href="{% url 'index' %}" class="btn logout-btn" style="margin-top: 20px;">⬅️ Back to Home</a>
+  
+    </div>
   </div>
-</div>
-
-</body>
-</html>
+  
+  </body>
+  </html>
+  

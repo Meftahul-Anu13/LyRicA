@@ -3,6 +3,10 @@
 import requests
 import os
 from django.conf import settings
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+from django.core.files.storage import FileSystemStorage
+
 
 def authenticate():
     """
@@ -10,7 +14,7 @@ def authenticate():
     """
     response = requests.post(
         f"{settings.PCLOUD_API_BASE_URL}/login",
-        data={'username': settings.PCLOUD_USERNAME, 'password': settings.PCLOUD_APP_PASSWORD}
+        data={'username': settings.PCLOUD_USERNAME, 'password': settings.PCLOUD_PASSWORD}
     )
     auth_data = response.json()
     if 'auth' in auth_data:
@@ -18,24 +22,62 @@ def authenticate():
     else:
         raise Exception("Failed to authenticate with pCloud: " + auth_data.get('error', 'Unknown error'))
 
-def upload_to_pcloud(file_path, file_name):
-    """
-    Upload a file to pCloud.
-    """
-    auth_token = authenticate()
-    url = f"{settings.PCLOUD_API_BASE_URL}/uploadfile"
-    with open(file_path, 'rb') as file:
-        files = {'file': (file_name, file)}
-        data = {'auth': auth_token, 'folderid': settings.PCLOUD_SONG_FOLDER}
-        response = requests.post(url, files=files, data=data)
-    
-    response_data = response.json()
-    if response_data.get('result') == 0:
-        return response_data.get('fileids', [None])[0]
-    else:
-        raise Exception("Failed to upload to pCloud: " + response_data.get('error', 'Unknown error'))
 
-def list_folder_contents(path=settings.PCLOUD_SONG_FOLDER):
+def upload_to_pcloud(mp3_file):
+    """
+    Upload the MP3 file to a specific folder in pCloud.
+    """
+    upload_url = "https://api.pcloud.com/uploadfile"  # pCloud upload endpoint
+    auth_token = authenticate()  # Get the authentication token from pCloud
+    folder_id = "23361959698"  # pCloud folder ID where the file will be uploaded
+
+    # File name from the file object
+    file_name = mp3_file.name  # Original file name
+    file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+
+    # Save the uploaded file to the local media folder
+    with open(file_path, 'wb') as f:
+        for chunk in mp3_file.chunks():
+            f.write(chunk)
+
+    try:
+        # Prepare the payload to upload to pCloud
+        with open(file_path, 'rb') as f:
+            files = {'file': (file_name, f, 'audio/mpeg')}
+            data = {
+                'auth': auth_token,  # pCloud authentication token
+                'folderid': folder_id  # Folder ID where the file will be uploaded
+            }
+
+            # Send the file to pCloud
+            response = requests.post(upload_url, files=files, data=data, timeout=60)
+
+        # Check if the upload was successful
+        if response.status_code == 200:
+            response_json = response.json()
+            if response_json.get("result") == 0:
+                # If successful, return the URL or some identifier
+                file_url = response_json.get("filelink")
+                print(f"File uploaded successfully. File URL: {file_url}")
+                return file_url
+            else:
+                print(f"Upload failed with result: {response_json.get('result')}")
+                return None
+        else:
+            print(f"Failed to upload file. Status code: {response.status_code}")
+            return None
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error uploading file: {e}")
+        return None
+
+    finally:
+        # Optionally remove the file from local storage after uploading
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+
+def list_folder_contents(path=settings.PCLOUD_MUSIC_FOLDER):
     """
     List the contents of a pCloud folder.
     """
