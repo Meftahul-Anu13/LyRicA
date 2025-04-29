@@ -6,33 +6,32 @@
   <title>All Artists | Lyrica</title>
   <link rel="stylesheet" href="{% static 'artist.css' %}">
   <style>
-    /* Navbar Styles */
-  .navbar {
-    background-color: #007bff; /* Blue background */
-    padding: 20px; /* Padding for spacing */
-    color: white; /* White text */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.5rem; /* Adjust font size */
-    font-weight: bold;
-    border-radius: 8px;
-    margin-bottom: 20px; /* Gap below the navbar */
-  }
-  
-  .logo-text {
-    color: white; /* Ensure the text is white */
-    text-decoration: none; /* Remove underline */
-  }
+   /* Navbar Styles */
+.navbar {
+        background-color: #007bff;
+        padding: 20px;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+.logo-text {
+        color: white;
+        text-decoration: none;
+      }
   </style>
 </head>
 <body>
-    <header class="navbar">
-        <div class="navbar-left">
-          <a href="{% url 'index' %}" class="logo-text">LyRicA</a>
-        </div>
-      </header>
-      
+  <header class="navbar">
+    <div class="navbar-left">
+      <a href="{% url 'index' %}" class="logo-text">LyRicA</a>
+    </div>
+  </header>
+
   <div class="pixel-window">
     <div class="pixel-header">
       <span class="pixel-title">🎧 Artists</span>
@@ -47,7 +46,7 @@
             <p><strong>Followers:</strong> {{ artist.followers }}</p>
             <p><strong>Genre:</strong> {{ artist.genre }}</p>
             <p><strong>Total Streams:</strong> {{ artist.streams }}</p>
-            
+
             <div class="artist-details">
               <div class="songs-list">
                 <h3>Songs:</h3>
@@ -67,15 +66,90 @@
                 </ul>
               </div>
             </div>
+
+            {% if request.user.user_type.user_type_name == 'User' %}
+            {% if artist.is_followed %}
+                <button class="unfollow-btn" id="unfollow-btn-{{ artist.id }}" data-artist-id="{{ artist.id }}">Unfollow</button>
+                <button class="follow-btn" id="follow-btn-{{ artist.id }}" data-artist-id="{{ artist.id }}" style="display:none">+ Follow</button>
+            {% else %}
+                <button class="follow-btn" id="follow-btn-{{ artist.id }}" data-artist-id="{{ artist.id }}">+ Follow</button>
+                <button class="unfollow-btn" id="unfollow-btn-{{ artist.id }}" data-artist-id="{{ artist.id }}" style="display:none">Unfollow</button>
+            {% endif %}
+            {% endif %}
           </div>
         {% endfor %}
       </div>
     </div>
+
     {% if request.user.user_type.user_type_name == "Admin" %}
-    <div class="back-to-dashboard">
+      <div class="back-to-dashboard">
         <a href="{% url 'admin_dashboard' %}" class="btn">↩️ Back to Dashboard</a>
       </div>
-    {% endif %}      
+    {% endif %}
   </div>
+
+<script>
+    window.onload = function() {
+    // Attach event listeners for all follow/unfollow buttons
+    const followButtons = document.querySelectorAll('.follow-btn');
+    const unfollowButtons = document.querySelectorAll('.unfollow-btn');
+
+    followButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const artistId = this.getAttribute('data-artist-id');
+            followArtist(artistId);
+        });
+    });
+
+    unfollowButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const artistId = this.getAttribute('data-artist-id');
+            unfollowArtist(artistId);
+        });
+    });
+};
+
+function followArtist(artistId) {
+    fetch(`/profile/dashboard/artists/follow-artist/${artistId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);  // Show success message
+            document.getElementById(`follow-btn-${artistId}`).style.display = 'none';
+            document.getElementById(`unfollow-btn-${artistId}`).style.display = 'inline-block';
+        } else {
+            alert(data.message);  // Show error message
+        }
+    })
+    .catch(error => console.log('Error:', error));
+}
+
+function unfollowArtist(artistId) {
+    fetch(`/profile/dashboard/artists/unfollow-artist/${artistId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);  // Show success message
+            document.getElementById(`unfollow-btn-${artistId}`).style.display = 'none';
+            document.getElementById(`follow-btn-${artistId}`).style.display = 'inline-block';
+        } else {
+            alert(data.message);  // Show error message
+        }
+    })
+    .catch(error => console.log('Error:', error));
+}
+</script>  
 </body>
 </html>

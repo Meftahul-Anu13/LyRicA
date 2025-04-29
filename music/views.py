@@ -20,7 +20,7 @@ from django.utils.timezone import now
 import logging
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import SongRequest, Song, Album, Artist, Genre
+from .models import SongRequest, Song, Album, Artist, Genre, ArtistFollow
 
 # Load environment variables
 load_dotenv()
@@ -225,18 +225,22 @@ def view_songs(request):
 def view_artists(request):
     artists = Artist.objects.all()
     artist_data = []
+    
     for artist in artists:
+        is_followed = ArtistFollow.objects.filter(user=request.user, artist=artist).exists()
         artist_data.append({
             'name': artist.name,
             'bio': artist.bio,
             'followers': artist.followers,
-            'songs': artist.song_set.all(),
-            'albums': artist.album_set.all(),
             'genre': artist.genre.name,
             'streams': artist.streams,
+            'songs': artist.song_set.all(),
+            'albums': artist.album_set.all(),
+            'is_followed': is_followed  # Pass the flag to the template
         })
-
+    
     return render(request, 'artist_list.html', {'artists': artist_data})
+
 
 
 # View all albums with their genres, artists, and songs
@@ -339,6 +343,60 @@ def delete_song(request, song_id):
 
     # Redirect to the songs list after deletion
     return redirect('view_songs')
+
+# Follow an artist
+@login_required
+def follow_artist(request, artist_id):
+    try:
+        artist = Artist.objects.get(id=artist_id)
+        
+        # Check if the user is already following the artist
+        if ArtistFollow.objects.filter(user=request.user, artist=artist).exists():
+            return JsonResponse({'success': False, 'message': 'Already following this artist'})
+
+        # Create a new follow record
+        ArtistFollow.objects.create(user=request.user, artist=artist)
+        
+        # Increment the followers count for the artist
+        artist.followers += 1
+        artist.save()
+
+        return JsonResponse({'success': True, 'message': 'You are now following this artist!'})
+
+    except Artist.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Artist not found'})
+
+# Unfollow an artist
+@login_required
+def unfollow_artist(request, artist_id):
+    try:
+        artist = Artist.objects.get(id=artist_id)
+
+        # Check if the user is following the artist
+        follow_record = ArtistFollow.objects.filter(user=request.user, artist=artist).first()
+        
+        if not follow_record:
+            return JsonResponse({'success': False, 'message': 'You are not following this artist'})
+
+        # Delete the follow record
+        follow_record.delete()
+
+        # Decrement the followers count for the artist
+        artist.followers -= 1
+        artist.save()
+
+        return JsonResponse({'success': True, 'message': 'You have unfollowed this artist.'})
+
+    except Artist.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Artist not found'})
+
+
+# View followed artists
+def followed_artists(request):
+    followed_artists = ArtistFollow.objects.filter(user=request.user).values('artist')
+    artists = Artist.objects.filter(id__in=[artist['artist'] for artist in followed_artists])
+    return render(request, 'followed_artists.html', {'followed_artists': artists})
+
 
 
 # Authenticate with pCloud

@@ -141,6 +141,35 @@ body {
       margin-bottom: 20px; /* Space between cards */
     }
   }
+
+/* Follow / Unfollow Button Styles */
+.follow-btn,
+.unfollow-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.follow-btn:hover,
+.unfollow-btn:hover {
+  background-color: #0056b3;
+}
+
+.follow-btn:active,
+.unfollow-btn:active {
+  background-color: #004085;
+}
+
+/* Button Container Styles */
+.artist-card .follow-unfollow-btns {
+  display: flex;
+  gap: 10px;
+}
   
  /* Back to Dashboard Button */
 .back-to-dashboard {

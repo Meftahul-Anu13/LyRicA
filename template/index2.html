@@ -24,6 +24,57 @@
       object-fit: cover; /* Ensures the image maintains its aspect ratio */
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Adds a subtle shadow to make it stand out */
     }
+
+/* Dashboard Boxes Container */
+#dashboardBoxes {
+    display: none; /* Hidden by default */
+    margin-top: 20px;
+}
+
+/* Individual Dashboard Box Styles */
+.dashboard-box {
+    background-color: #4c6ef5;
+    text-align: center;
+    padding: 2px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+p.all{
+    font-size: 1rem;
+    color: #fff; /* White text for better contrast */
+}
+
+.dashboard-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Highlighting for numbers */
+.highlight {
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* Responsive Design for Small Screens */
+@media (max-width: 768px) {
+    .dashboard-box {
+        padding: 15px;
+    }
+    
+    li a {
+        font-size: 14px;
+        padding: 8px 15px;
+    }
+    
+    .highlight {
+        font-size: 16px;
+    }
+}
+
   </style>
 </head>
 
@@ -49,8 +100,9 @@
             <a href="{% url 'index' %}">Discover</a>
           </li>
           <li class="{% if request.path == '/explore/' %}active{% endif %}">
-            <a href="{% url 'index' %}">Explorer</a>
-          </li>
+            <a href="javascript:void(0)" onclick="toggleDashboardBoxes()">Explore</a>
+        </li>
+        
           <li class="{% if request.path == '/song_list/' %}active{% endif %}">
             <a href="{% url 'song_list' %}">Search</a>
           </li>
@@ -63,14 +115,14 @@
             <a href="{% url 'my_music' %}">My Music</a>
           </li>
 
-          <li><a href="{% url 'album' %}">Albums</a></li>
-          <li><a href="{% url 'artists' %}">Artists</a></li>
+          <li><a href="{% url 'album' %}">My Albums</a></li>
+          <li><a href="{% url 'artists' %}">My Artists</a></li>
         </ul>
       </div>
       <div class="playlist">
         <p>PLAYLIST</p>
         <ul>
-          <li><a href="#">Cover</a></li>
+          <li><a href="{% url 'followed_artists' %}">Following</a></li>
           <li><a href="{% url 'favorites' %}">Favorites</a></li>
           {% block my_music_fav %} {% endblock %}
           <li><a href="{% url 'signup' %}">Logout</a></li>
@@ -148,6 +200,16 @@
 </body>
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" />
 <script>
+  function toggleDashboardBoxes() {
+    var dashboardBoxes = document.getElementById('dashboardBoxes');
+    
+    // Toggle the visibility of the dashboard boxes
+    if (dashboardBoxes.style.display === 'none' || dashboardBoxes.style.display === '') {
+        dashboardBoxes.style.display = 'block';  // Show the boxes
+    } else {
+        dashboardBoxes.style.display = 'none';  // Hide the boxes
+    }
+}
   document.querySelectorAll(".add-to-favorites").forEach((button) => {
     button.addEventListener("click", function () {
       const songId = this.dataset.songId;

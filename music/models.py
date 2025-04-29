@@ -130,3 +130,14 @@ class PlaylistSong(models.Model):
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
 def __str__(self):
         return f"{self.song.title} in {self.playlist.name}"
+
+class ArtistFollow(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # User who is following
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)  # Artist being followed
+
+    class Meta:
+        unique_together = ['user', 'artist']  # Ensure a user can follow an artist only once
+
+    def __str__(self):
+        return f"{self.user.name} follows {self.artist.name}"
+

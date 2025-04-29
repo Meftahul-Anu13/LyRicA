@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Followed Artists | Lyrica</title>
+  <link rel="stylesheet" href="{% static 'followed_artists.css' %}">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="navbar-left">
+      <a href="{% url 'index' %}" class="logo-text">LyRicA</a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="followed-artists">
+    <h2>Followed Artists</h2>
+    
+    <!-- Artists List -->
+    <ul>
+      {% for artist in followed_artists %}
+        <li>
+          <span>{{ artist.name }}</span>
+          <form method="POST" action="{% url 'unfollow_artist' artist.id %}">
+            {% csrf_token %}
+            <button type="submit" class="unfollow-btn">Unfollow</button>
+          </form>
+        </li>
+      {% empty %}
+        <p>No followed artists yet.</p>
+      {% endfor %}
+    </ul>
+
+    <!-- Back to Dashboard Button -->
+    <div class="back-to-dashboard">
+      <a href="{% url 'index' %}" class="btn">↩️ Back to Home</a>
+    </div>
+  </div>
+</body>
+</html>

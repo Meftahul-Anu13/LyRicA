@@ -1,0 +1,128 @@
+/* General Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f6f8;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+  
+  /* Navbar Styles */
+  .navbar {
+    background-color: #007bff; /* Blue background */
+    padding: 20px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .logo-text {
+    color: white;
+    text-decoration: none;
+  }
+  
+  /* Followed Artists Container */
+  .followed-artists {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+  
+  /* Header for Followed Artists */
+  .followed-artists h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #007bff; /* Blue color for heading */
+    margin-bottom: 20px;
+  }
+  
+  /* List of Followed Artists */
+  .followed-artists ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .followed-artists li {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+    padding: 8px;
+    background-color: #f0f4ff;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .followed-artists li:hover {
+    background-color: #d1e3ff; /* Slightly darker blue background on hover */
+  }
+  
+  /* Button for Unfollow */
+  .unfollow-btn {
+    background-color: #dc3545; /* Red background for unfollow button */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .unfollow-btn:hover {
+    background-color: #c82333; /* Darker red on hover */
+  }
+  
+  /* Back to Dashboard Button */
+  .back-to-dashboard {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+  }
+  
+  .back-to-dashboard .btn {
+    padding: 12px 25px;
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+  
+  .back-to-dashboard .btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .back-to-dashboard .btn:active {
+    background-color: #004085;
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 768px) {
+    .followed-artists {
+      padding: 15px;
+    }
+  
+    .followed-artists h2 {
+      font-size: 1.8rem;
+    }
+  
+    .followed-artists li {
+      font-size: 1rem;
+    }
+  }
+  
