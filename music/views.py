@@ -29,6 +29,7 @@ from django.conf import settings
 from datetime import date
 from tinytag import TinyTag
 from django.db import transaction
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 
 # Load environment variables
 load_dotenv()
@@ -366,7 +367,273 @@ def view_songs(request):
     return render(request, 'song_list_detail.html', {'songs': songs})
 
 
-# Song details
+# Song detailsimport logging
+
+# Create a logger
+logger = logging.getLogger(__name__)
+
+# Set the logging level
+logger.setLevel(logging.DEBUG)
+
+# Create a file handler
+file_handler = logging.FileHandler('app.log')
+file_handler.setLevel(logging.DEBUG)
+
+# Create a console handler
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+
+# Create a formatter and set it for the handlers
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+console_handler.setFormatter(formatter)
+
+# Add the handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
+
+# Add logs to the existing code
+def signup_view(request):
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            form.save()
+            logger.info("User signed up successfully")
+            messages.success(request, "Your account has been created successfully!")
+            return redirect('login')
+        else:
+            logger.error("Signup failed")
+            messages.error(request, "Signup failed. Please fix the errors below.")
+    else:
+        form = SignupForm()
+
+    user_types = UserType.objects.all()  # Fetch all user types for dropdown
+    return render(request, 'signup2.html', {'form': form, 'user_types': user_types})
+
+def login_view(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data.get('email')
+            password = form.cleaned_data.get('password')
+
+            try:
+                user = User.objects.get(email=email)
+                if check_password(password, user.password):  # Verify hashed password
+                    logger.info("User logged in successfully")
+                    login(request, user)  # Log the user in
+                    messages.success(request, "You have successfully logged in!")
+                    return redirect('index')  # Redirect to a success page
+                else:
+                    logger.error("Invalid email or password")
+                    messages.error(request, "Invalid email or password.")
+            except User.DoesNotExist:
+                logger.error("User does not exist")
+                messages.error(request, "User with this email does not exist.")
+        else:
+            logger.error("Invalid form submission")
+            messages.error(request, "Invalid form submission.")
+    else:
+        form = LoginForm()
+
+    return render(request, 'login2.html', {'form': form})
+
+def logout_view(request):
+    logger.info("User logged out successfully")
+    logout(request)
+    messages.success(request, "You have been logged out successfully!")
+    return redirect('login')
+
+def index(request):
+    logger.info("User accessed the index page")
+    return render(request, 'index2.html')  # Assuming index.html is the homepage of your app
+
+def profile_view(request):
+    logger.info("User accessed the profile page")
+    return render(request, 'account.html')
+
+def edit_profile(request):
+    user = request.user
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        user.gender = request.POST.get('gender')
+        user.country = request.POST.get('country')
+        user.date_of_birth = request.POST.get('date_of_birth')
+
+        user.name = name
+        user.email = email
+
+        if password:
+            user.password = make_password(password)
+
+        user.save()
+        logger.info("User profile updated successfully")
+        messages.success(request, "Profile updated successfully!")
+        return redirect('profile_view')
+
+    return render(request, 'edit_profile.html')
+
+def request_song(request):
+    if request.method == "POST":
+        song_title = request.POST.get('song_title')
+        album = request.POST.get('album')
+        artist = request.POST.get('artist')
+        genre = request.POST.get('genre')
+        release_year = request.POST.get('release_year')
+
+        SongRequest.objects.create(
+            user=request.user,
+            admin=User.objects.filter(user_type__user_type_name='Admin').first(),
+            song_title=song_title,
+            album=album,
+            artist=artist,
+            genre=genre,
+            release_year=release_year,
+            status="Pending",
+        )
+        logger.info("Song request submitted successfully")
+        messages.success(request, "Your song request has been submitted successfully!")
+        return redirect('request_song')  # Reload the same page to see the new request
+
+    # Fetch all requests by this user to display below the form
+    my_requests = SongRequest.objects.filter(user=request.user).order_by('-request_date')
+
+    return render(request, 'request_song.html', {'my_requests': my_requests})
+
+def admin_view_song_requests(request):
+    if request.user.user_type.user_type_name != "Admin":
+        logger.error("Unauthorized access to admin view song requests")
+        return redirect('index')  # Not allowed if not Admin
+
+    song_requests = SongRequest.objects.all().order_by('-request_date')
+    logger.info("Admin viewed song requests successfully")
+    return render(request, 'admin_view_song_requests.html', {'song_requests': song_requests})
+
+def admin_upload_song(request, id):
+    song_request = get_object_or_404(SongRequest, id=id)
+
+    if request.method == 'POST':
+        mp3_file = request.FILES['mp3_file']
+
+        if mp3_file:
+            # Set the file storage path
+            file_storage = FileSystemStorage(location=settings.MEDIA_ROOT)
+            
+            # Save the file to the defined MEDIA_ROOT directory
+            filename = file_storage.save(mp3_file.name, mp3_file)
+            file_url = file_storage.url(filename)  # Get the URL of the file
+
+            # Debugging: Check if the file is saved
+            print(f"File uploaded and saved as: {filename}")
+            print(f"File is accessible at: {file_url}")
+
+            # Now upload the file to pCloud
+            # Pass the mp3_file directly instead of the filename string
+            file_url_pcloud = upload_to_pcloud(mp3_file)
+
+            if file_url_pcloud:
+                # Update SongRequest status to 'Approved' after successful upload
+                song_request.status = 'Approved'  # Update status to 'Approved'
+                song_request.file_url = file_url_pcloud  # Save the pCloud URL
+                song_request.save()  # Save the changes
+
+                logger.info("Song uploaded successfully and uploaded to pCloud")
+                messages.success(request, "Song uploaded successfully and uploaded to pCloud.")
+                return redirect('admin_view_song_requests')
+            else:
+                logger.error("Failed to upload to pCloud")
+                messages.error(request, "Failed to upload to pCloud.")
+                return redirect('admin_view_song_requests')
+        else:
+            logger.error("No MP3 file uploaded")
+            messages.error(request, "No MP3 file uploaded.")
+            return redirect('admin_view_song_requests')
+
+def reject_song_request(request, id):
+    song_request = get_object_or_404(SongRequest, id=id)
+
+    if request.method == 'POST':
+        song_request.status = 'Rejected'
+        song_request.save()
+        logger.info("Song request rejected successfully")
+        messages.success(request, "Song request rejected.")
+        return redirect('admin_view_song_requests')
+
+def upload_song(request):
+    if request.method == 'POST':
+        song_title = request.POST['song_title']
+        artist_name = request.POST['artist']
+        album_name = request.POST['album']
+        genre_name = request.POST['genre']
+        release_date = request.POST['release_date']  # This will be in the format YYYY-MM-DD
+        mp3_file = request.FILES['mp3_file']
+
+        # Parse the release date into a date object
+        try:
+            release_date = date.fromisoformat(release_date)
+        except ValueError:
+            logger.error("Invalid release date")
+            messages.error(request, "Invalid release date.")
+            return redirect('upload_song')
+
+        # Check if the artist exists, if not, create it
+        artist, created = Artist.objects.get_or_create(name=artist_name)
+
+        # Check if the genre exists, if not, create it
+        genre, created = Genre.objects.get_or_create(name=genre_name)
+
+        # Try to get the album based on title and artist
+        album = Album.objects.filter(title=album_name, artist=artist).first()
+
+        if not album:
+            # If the album doesn't exist, create a new one with the release_date
+            album = Album.objects.create(
+                title=album_name,
+                artist=artist,
+                release_date=release_date  # Use the parsed release_date
+            )
+
+        # Handle file saving
+        fs = FileSystemStorage()
+        filename = fs.save(mp3_file.name, mp3_file)
+        file_url = fs.url(filename)
+
+        # Extract the duration of the MP3 file using TinyTag
+        tag = TinyTag.get(f'./media/{filename}')
+        duration = int(tag.duration)  # Get the duration in seconds
+
+        # Get the current logged-in user (admin)
+        admin_user = request.user
+
+        # Create the song entry, with the admin field populated and the duration
+        song = Song.objects.create(
+            title=song_title,
+            album=album,
+            artist=artist,
+            genre=genre,
+            released_year=release_date.year,
+            released_month=release_date.month,
+            released_day=release_date.day,
+            duration=duration,  # Save the duration (in seconds)
+            file_url=file_url,  # Save the file URL
+            admin=admin_user  # Set the admin to the logged-in user
+        )
+
+        logger.info("Song uploaded successfully")
+        messages.success(request, "Song uploaded successfully!")
+        return redirect('song_list')
+
+    return render(request, 'upload_song.html')
+
+def admin_dashboard(request):
+    # Fetch totals for songs, artists, albums, and genres
+    total_songs = Song.objects.count()
+    total_artists = Artist.objects.count()
+    total_albums = Album.objects.count()
+    total_genres = Genre.objects.count
 @login_required
 def song_detail(request, song_id):
     song = get_object_or_404(Song, id=song_id)
@@ -512,40 +779,39 @@ def song_list(request):
         return HttpResponse(f"Error: {str(e)}", status=500)
 
 
-# Search view   
 def search(request):
-    query = request.GET.get('q', '').strip()  # Get and clean the query
-    if query:  # Only perform the search if a query is provided
+    query = request.POST.get('search_query', '').strip()  # Use POST for form submission
+    if query:
+        # Create search vector for songs' title and artists' names
         search_vector = (
-            SearchVector('title', weight='A') +
-            SearchVector('artist__name', weight='B') +
-            SearchVector('genre__name', weight='C')
+            SearchVector('title', weight='A') +  # Search songs by title
+            SearchVector('artist__name', weight='B')  # Search artists by name
         )
         search_query = SearchQuery(query)
 
-        # Search songs with ranking
+        # Search songs and rank them
         songs = (
             Song.objects.annotate(rank=SearchRank(search_vector, search_query))
             .filter(rank__gte=0.1)  # Filter by relevance
             .order_by('-rank')
         )
 
-        # Search artists, albums, and playlists (simplified search for these models)
+        # Search for artists
         artists = Artist.objects.annotate(search=SearchVector('name')).filter(search=search_query)
-        albums = Album.objects.annotate(search=SearchVector('title')).filter(search=search_query)
-        playlists = Playlist.objects.annotate(search=SearchVector('name')).filter(search=search_query)
     else:
-        # Empty query, return empty lists
-        songs, artists, albums, playlists = [], [], [], []
+        # If no query is provided, return empty lists
+        songs, artists = [], []
 
+    # Prepare context
     context = {
         'query': query,
         'songs': songs,
         'artists': artists,
-        'albums': albums,
-        'playlists': playlists,
+        'search_results_count': len(songs) + len(artists),  # Total number of results
     }
-    return render(request, 'music/search_results.html', context)          
+    return render(request, 'search.html', context)
+
+
 # use this play_song to play the clcking song in the now playing songs part 
 def play_song(request, song_title):
     """Fetch the song, increment the stream count, and return the playback URL."""

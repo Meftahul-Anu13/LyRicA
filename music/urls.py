@@ -85,11 +85,17 @@ urlpatterns = [
     path('profile/dashboard/songs/edit/<int:song_id>/', views.edit_song, name='edit_song'),
     path('profile/dashboard/songs/delete/<int:song_id>/', views.delete_song, name='delete_song'),
     path('song/increment-stream/<int:song_id>/', views.increment_stream, name='increment_stream'),
-    path('profile/dashboard/artists/follow-artist/<int:artist_id>/', views.follow_artist, name='follow_artist'),
-    path('profile/dashboard/artists/unfollow-artist/<int:artist_id>/', views.unfollow_artist, name='unfollow_artist'),
 
-    path('followed-artists/', views.followed_artists, name='followed_artists'),
+   
+    path('artists/', views.artist_list, name='artist_list'),
+    path('artists/follow/<int:artist_id>/', views.follow_artist, name='follow_artist'),
+    path('artists/unfollow/<int:artist_id>/', views.unfollow_artist, name='unfollow_artist'),
+    path('artists/followed/', views.followed_artists, name='followed_artists'),
+    
+    path('/', views.shuffled_songs_view, name='shuffled_songs'),
+    path('my_music/shuffled/', views.shuffled_my_songs_view, name='shuffled_my_music'),
 ]
+
 
 # Log the URL patterns
 logger.info('URL patterns loaded')
