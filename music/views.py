@@ -28,6 +28,7 @@ from django.conf import settings
 from datetime import date
 from tinytag import TinyTag
 from django.db import transaction
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 
 # Load environment variables
 load_dotenv()
@@ -536,40 +537,39 @@ def song_list(request):
         return HttpResponse(f"Error: {str(e)}", status=500)
 
 
-# Search view   
 def search(request):
-    query = request.GET.get('q', '').strip()  # Get and clean the query
-    if query:  # Only perform the search if a query is provided
+    query = request.POST.get('search_query', '').strip()  # Use POST for form submission
+    if query:
+        # Create search vector for songs' title and artists' names
         search_vector = (
-            SearchVector('title', weight='A') +
-            SearchVector('artist__name', weight='B') +
-            SearchVector('genre__name', weight='C')
+            SearchVector('title', weight='A') +  # Search songs by title
+            SearchVector('artist__name', weight='B')  # Search artists by name
         )
         search_query = SearchQuery(query)
 
-        # Search songs with ranking
+        # Search songs and rank them
         songs = (
             Song.objects.annotate(rank=SearchRank(search_vector, search_query))
             .filter(rank__gte=0.1)  # Filter by relevance
             .order_by('-rank')
         )
 
-        # Search artists, albums, and playlists (simplified search for these models)
+        # Search for artists
         artists = Artist.objects.annotate(search=SearchVector('name')).filter(search=search_query)
-        albums = Album.objects.annotate(search=SearchVector('title')).filter(search=search_query)
-        playlists = Playlist.objects.annotate(search=SearchVector('name')).filter(search=search_query)
     else:
-        # Empty query, return empty lists
-        songs, artists, albums, playlists = [], [], [], []
+        # If no query is provided, return empty lists
+        songs, artists = [], []
 
+    # Prepare context
     context = {
         'query': query,
         'songs': songs,
         'artists': artists,
-        'albums': albums,
-        'playlists': playlists,
+        'search_results_count': len(songs) + len(artists),  # Total number of results
     }
-    return render(request, 'music/search_results.html', context)          
+    return render(request, 'search.html', context)
+
+
 # use this play_song to play the clcking song in the now playing songs part 
 def play_song(request, song_title):
     """Fetch the song, increment the stream count, and return the playback URL."""

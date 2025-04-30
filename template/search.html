@@ -5,102 +5,193 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Artist Profile</title>
-  <link rel="stylesheet" type="text/css" href="{% static 'search-style.css' %}" />
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.4/dist/tailwind.min.css" rel="stylesheet">
+  <title>Search | LyRicA</title>
+  <link rel="stylesheet" href="{% static 'search-style.css' %}">
   <style>
+/* General Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f9; /* Light grey background */
+  color: #333;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-    .artist-header {
-      background-image: url('https://cdn.punchng.com/wp-content/uploads/2023/05/20120536/Rema.jpeg');
-      background-size: cover;
-      background-position: center;
-      height: 60vh;
-    }
+.navbar {
+  background-color: #4c6ef5; /* Blue background */
+  padding: 10px 20px;
+  color: white;
+  display: flex;
+  justify-content: flex-start; /* Align logo to the left */
+  align-items: center;
+}
 
+.navbar .logo {
+  font-size: 24px;
+  color: white;
+  text-decoration: none;
+  margin-left: 0; /* Ensure the logo is aligned to the left */
+}
+
+/* Search Form */
+.search-container {
+  text-align: center;
+  margin: 50px 0;
+}
+
+.search-container input[type="search"] {
+  padding: 10px;
+  width: 250px; /* Shortened width of the search input */
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.search-container button {
+  padding: 10px 15px;
+  background-color: #4c6ef5; /* Blue button */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+}
+
+.search-container button:hover {
+  background-color: #3753c6; /* Darker blue on hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+}
+
+.search-container button:active {
+  background-color: #2d48a3;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1); /* Slightly lighter shadow on active state */
+}
+
+/* Results Section */
+.results-container {
+  max-width: 800px; /* Max width of the result container */
+  margin: 20px auto; /* Center the container */
+  padding: 20px; /* Add padding inside the container */
+  background-color: #ffffff; /* White background for the results */
+  border-radius: 10px; /* Rounded corners for the results container */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+}
+
+.results-container h3 {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+  color: #4c6ef5; /* Blue color for the heading */
+  text-align: center; /* Center-align the heading */
+}
+
+.results-container h4 {
+  font-size: 1.2em;
+  margin-bottom: 10px;
+}
+
+.results-container ul {
+  list-style: none;
+  padding: 0;
+}
+
+.results-container li {
+  background-color: white;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+}
+
+.results-container li a {
+  text-decoration: none;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.track-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+.results-container li p {
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .search-container input[type="search"] {
+    width: 70%; /* Adjust search input width on smaller screens */
+  }
+
+  .results-container li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .track-image {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+}
   </style>
 </head>
-<body class="bg-black text-white flex">
+<body>
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <!-- Spotify Logo -->
-    <div class="logo-container">
-        <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Green.png" alt="Spotify Logo" style="width: 100%; height: auto; padding: 20px; box-sizing: border-box;">
-    </div>
+  <!-- Navbar -->
+  <header class="navbar">
+    <a href="/" class="logo">LyRicA</a>
+  </header>
 
-    <!-- Welcome User -->
-    <div class="sidebar-section">
-        <span style="margin-left: 14px;" class="sidebar-link-icon">👤</span>
-        <b>Welcome, {{user.username}}</b>
-        <br>
-        <br>
+  <!-- Search Form -->
+  <div class="search-container">
+    <h2>Search for Music</h2>
+    <form action="/search/" method="POST">
+      {% csrf_token %}
+      <input type="search" name="search_query" placeholder="What do you want to listen to?" required>
+      <button type="submit">Search</button>
+    </form>
+  </div>
 
-        <a href="/logout">
-            <span class="sidebar-link-icon">↪️</span>
-            <b>Logout</b>
-        </a>
-    </div>
-
-    <!-- Top section of the sidebar -->
-    <div class="sidebar-section">
-        <a href="/" class="sidebar-link active">
-            <span class="sidebar-link-icon">🏠</span>
-            Home
-        </a>
-        <a href="/search" class="sidebar-link">
-            <span class="sidebar-link-icon">🔍</span>
-            Search
-        </a>
-    </div>
-
-</div>
-
-
-
-
-  <!-- Main Content -->
-  <div class="flex-1">
-      
-    <br>
-    <br>
-    <header class="header-container">
-        <form action="search" method="POST">
-            {% csrf_token %}
-
-            <div class="search-bar" style="width: 390px;">
-                <input type="search" name="search_query" placeholder="What do you want to listen to?" aria-label="Search">
-                <button type="submit" aria-label="Search">
-                    🔍
-                </button>
-            </div>
-        </form>
-    </header>
+  <!-- Results Section -->
+  <div class="results-container">
+    <h3>Search Results ({{ search_results_count }} results)</h3>
     
-    <!-- Popular Tracks Section -->
-    <div class="p-5">
-      <br>
-      <h2 class="text-2xl font-bold mb-4">Search Results ({{search_results_count}} results)</h2>
-      <div class="divide-y divide-gray-800">
-        <!-- Single Track Row -->
-        {% for track in track_list %}
-        <div class="flex justify-between items-center py-3">
-          <div class="flex items-center space-x-4">
-            <img src="{{track.track_image}}" alt="{{track.track_name}}" class="w-12 h-12">
-            <div>
-              <a href="/music/{{track.trackid}}">
-                <p class="text-base font-medium">{{track.track_name}}</p>
-                <p class="text-xs text-gray-400">{{track.artist_name}}</p>
-              </a>
-            </div>
-          </div>
-          <div class="text-gray-400">{{track.duration}}</div>
-        </div>
+    <!-- Display Songs -->
+    {% if songs %}
+      <h4>Songs</h4>
+      <ul>
+        {% for song in songs %}
+          <li>
+              <p>{{ song.title }} - {{ song.artist.name }}</p>
+          </li>
         {% endfor %}
-        <!-- Repeat for other tracks -->
-      </div>
-      <!-- <a href="#" class="text-green-500 text-sm">See more</a> -->
-    </div>
-    
+      </ul>
+    {% else %}
+      <p>No songs found.</p>
+    {% endif %}
+
+    <!-- Display Artists -->
+    {% if artists %}
+      <h4>Artists</h4>
+      <ul>
+        {% for artist in artists %}
+          <li>
+              <p>{{ artist.name }}</p>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No artists found.</p>
+    {% endif %}
   </div>
 
 </body>
