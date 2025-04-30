@@ -59,11 +59,11 @@ urlpatterns = [
     path('my_music/', views.my_music, name='my_music'),
     path('remove-from-favorites/<int:song_id>/', views.remove_from_favorites, name='remove_from_favorites'),
     path('play-song/<str:song_title>/', views.play_song, name='play_song'),
-    path('artists/', views.show_artists, name='artists'),
+    path('my_artists/', views.show_artists, name='artists'),
     path('get-artist-songs/<int:artist_id>/', views.get_artist_songs, name='get_artist_songs'),
-    path('albums/', views.show_album, name='album'),
+    path('my_albums/', views.show_album, name='album'),
     path('get-album-songs/<int:album_id>/', views.get_album_songs,name ='get_album_songs'),
-    path('favorites/', views.favorites, name='favorites'),
+    path('my_favorites/', views.favorites, name='favorites'),
     path('top-songs/', views.top_songs, name='top_songs'),
     path('increment-stream/<int:song_id>/', views.increment_stream, name='increment_stream'),
     path('profile/', views.profile_view, name='profile_view'),
@@ -87,9 +87,9 @@ urlpatterns = [
     path('song/increment-stream/<int:song_id>/', views.increment_stream, name='increment_stream'),
     path('profile/dashboard/artists/follow-artist/<int:artist_id>/', views.follow_artist, name='follow_artist'),
     path('profile/dashboard/artists/unfollow-artist/<int:artist_id>/', views.unfollow_artist, name='unfollow_artist'),
-    path('upload-song/', views.upload_song, name='upload_song'),
+
     path('followed-artists/', views.followed_artists, name='followed_artists'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
 
 # Log the URL patterns
 logger.info('URL patterns loaded')

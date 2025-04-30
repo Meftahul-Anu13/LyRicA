@@ -1,4 +1,5 @@
 import os
+import random
 import requests
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -418,60 +419,35 @@ def delete_song(request, song_id):
     # Redirect to the songs list after deletion
     return redirect('view_songs')
 
-# Follow an artist
+@login_required
+def artist_list(request):
+    artists = Artist.objects.all()
+    followed_ids = ArtistFollow.objects.filter(user=request.user).values_list('artist_id', flat=True)
+    for artist in artists:
+        artist.is_followed = artist.id in followed_ids
+    return render(request, 'artist_list.html', {'artists': artists})
+
 @login_required
 def follow_artist(request, artist_id):
-    try:
-        artist = Artist.objects.get(id=artist_id)
-        
-        # Check if the user is already following the artist
-        if ArtistFollow.objects.filter(user=request.user, artist=artist).exists():
-            return JsonResponse({'success': False, 'message': 'Already following this artist'})
+    if request.method == 'POST':
+        artist = get_object_or_404(Artist, id=artist_id)
+        ArtistFollow.objects.get_or_create(user=request.user, artist=artist)
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
 
-        # Create a new follow record
-        ArtistFollow.objects.create(user=request.user, artist=artist)
-        
-        # Increment the followers count for the artist
-        artist.followers += 1
-        artist.save()
-
-        return JsonResponse({'success': True, 'message': 'You are now following this artist!'})
-
-    except Artist.DoesNotExist:
-        return JsonResponse({'success': False, 'message': 'Artist not found'})
-
-# Unfollow an artist
 @login_required
 def unfollow_artist(request, artist_id):
-    try:
-        artist = Artist.objects.get(id=artist_id)
+    if request.method == 'POST':
+        artist = get_object_or_404(Artist, id=artist_id)
+        ArtistFollow.objects.filter(user=request.user, artist=artist).delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
 
-        # Check if the user is following the artist
-        follow_record = ArtistFollow.objects.filter(user=request.user, artist=artist).first()
-        
-        if not follow_record:
-            return JsonResponse({'success': False, 'message': 'You are not following this artist'})
-
-        # Delete the follow record
-        follow_record.delete()
-
-        # Decrement the followers count for the artist
-        artist.followers -= 1
-        artist.save()
-
-        return JsonResponse({'success': True, 'message': 'You have unfollowed this artist.'})
-
-    except Artist.DoesNotExist:
-        return JsonResponse({'success': False, 'message': 'Artist not found'})
-
-
-# View followed artists
+@login_required
 def followed_artists(request):
-    followed_artists = ArtistFollow.objects.filter(user=request.user).values('artist')
-    artists = Artist.objects.filter(id__in=[artist['artist'] for artist in followed_artists])
-    return render(request, 'followed_artists.html', {'followed_artists': artists})
-
-
+    followed = ArtistFollow.objects.filter(user=request.user).select_related('artist')
+    followed_artists = [f.artist for f in followed]
+    return render(request, 'followed_artists.html', {'followed_artists': followed_artists})
 
 # Authenticate with pCloud
 def authenticate_pcloud():
@@ -577,7 +553,7 @@ def play_song(request, song_title):
         # Fetch song from database
         song = Song.objects.filter(title=song_title).first()
         if not song:
-            return JsonResponse({"error": "Song not found in database."}, status=404)
+            return JsonResponse({"error": "Song found in database."}, status=404)
 
         # Authenticate with pCloud
         auth_token = authenticate_pcloud()
@@ -843,3 +819,25 @@ def increment_stream(request, song_id):
         return JsonResponse({"success": True, "streams": song.streams})
     except Song.DoesNotExist:
         return JsonResponse({"error": "Song not found"})
+    
+@login_required   
+def shuffled_songs_view(request):
+    shuffled_songs = Song.objects.order_by('?')  # Efficient random ordering
+    return render(request, 'index2.html', {'songs': shuffled_songs})
+
+@login_required
+def shuffled_my_songs_view(request):
+    user = request.user
+    listens = Listen.objects.filter(user=user).order_by('-played_at')
+
+    # Remove duplicate songs
+    unique_songs = {}
+    for listen in listens:
+        if listen.song.id not in unique_songs:
+            unique_songs[listen.song.id] = listen
+
+    # Convert to list and shuffle
+    unique_listens = list(unique_songs.values())
+    random.shuffle(unique_listens)
+
+    return render(request, 'my_music.html', {'listens': unique_listens})

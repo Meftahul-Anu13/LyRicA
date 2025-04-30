@@ -86,6 +86,10 @@ header {
   margin-bottom: 20px;
 }
 
+header .controls {
+  margin-left: 200px; /* move it closer */
+}
+
 .controls button {
   padding: 10px 20px;
   border: none;
@@ -102,6 +106,7 @@ header {
 .controls .shuffle {
   background-color: #e0e7ff;
   color: #4c6ef5;
+  margin-left: 20px;
 }
 
 .music-list .track {
@@ -567,6 +572,9 @@ body {
 
 .admin-actions a {
   margin: 5px;
+}
+.top-song {
+ gap: 5px;
 }
 
 @media (max-width: 768px) {

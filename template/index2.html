@@ -147,13 +147,13 @@ p.all{
           <li><a href="{% url 'signup' %}">Logout</a></li>
         </ul>
       </div>
-      {% if request.user.user_type.user_type_name == "User" %}
+      {% if request.user.user_type.user_type_name == "User"%}
 <div class="request-song-container">
   <a href="{% url 'request_song' %}" class="btn request-btn">🎵 Request a Song</a>
 </div>
 {% endif %}
 {% if request.user.user_type.user_type_name == "Admin" %}
-      <a href="{% url 'admin_view_song_requests' %}" class="btn blue-btn" style="text-align: center;">Song Requests</a>
+      <a href="{% url 'admin_view_song_requests' %}" class="btn blue-btn" style="text-align: center;"> Song Requests</a>
     {% endif %}
     {% if request.user.user_type.user_type_name == "Artist" %}
   <div class="upload-song-container">
@@ -167,8 +167,10 @@ p.all{
       <header>
         <h1>{% block title %}Discover Music{% endblock %}</h1>
         <div class="controls">
-          <button class="play">Play</button>
-          <button class="shuffle">Shuffle</button>
+          <!-- <button class="play">Play</button> -->
+          <a href="{% url 'shuffled_songs' %}">
+            <button class="shuffle">Shuffle</button>
+          </a>
         </div>
       </header>
 
@@ -288,9 +290,10 @@ p.all{
               songElement.setAttribute("data-song-title", song.song_title);
               songElement.setAttribute("data-artist-name", song.artist_name);
               songElement.style.backgroundColor = "#fff";  // Set a simple background color directly
-              songElement.style.padding = "12px";
-              songElement.style.marginBottom = "4px";
-              songElement.style.marginTop = "3px";
+
+              songElement.style.padding = "15px";
+              songElement.style.marginBottom = "10px";
+
               songElement.style.display = "none";
               songElement.offsetHeight; // Force reflow
               songElement.style.display = "flex"; // Or any other valid display style

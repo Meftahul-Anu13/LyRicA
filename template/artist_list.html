@@ -67,14 +67,14 @@
               </div>
             </div>
 
-            {% if request.user.user_type.user_type_name == 'User' %}
-            {% if artist.is_followed %}
-                <button class="unfollow-btn" id="unfollow-btn-{{ artist.id }}" data-artist-id="{{ artist.id }}">Unfollow</button>
-                <button class="follow-btn" id="follow-btn-{{ artist.id }}" data-artist-id="{{ artist.id }}" style="display:none">+ Follow</button>
-            {% else %}
-                <button class="follow-btn" id="follow-btn-{{ artist.id }}" data-artist-id="{{ artist.id }}">+ Follow</button>
-                <button class="unfollow-btn" id="unfollow-btn-{{ artist.id }}" data-artist-id="{{ artist.id }}" style="display:none">Unfollow</button>
-            {% endif %}
+            {% if request.user.user_type.user_type_name == "User" %}
+            <div class="follow-actions" id="follow-actions-{{ artist.id }}">
+              {% if artist.is_followed %}
+                <button class="btn-unfollow" onclick="toggleFollow({{ artist.id }}, false,'{{ artist.name }}')">Unfollow</button>
+              {% else %}
+                <button class="btn-follow" onclick="toggleFollow({{ artist.id }}, true)">+ Follow</button>
+              {% endif %}
+            </div>
             {% endif %}
           </div>
         {% endfor %}
@@ -88,68 +88,36 @@
     {% endif %}
   </div>
 
-<script>
-    window.onload = function() {
-    // Attach event listeners for all follow/unfollow buttons
-    const followButtons = document.querySelectorAll('.follow-btn');
-    const unfollowButtons = document.querySelectorAll('.unfollow-btn');
+  <script>
+    const csrfToken = '{{ csrf_token }}';
 
-    followButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const artistId = this.getAttribute('data-artist-id');
-            followArtist(artistId);
-        });
-    });
-
-    unfollowButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const artistId = this.getAttribute('data-artist-id');
-            unfollowArtist(artistId);
-        });
-    });
-};
-
-function followArtist(artistId) {
-    fetch(`/profile/dashboard/artists/follow-artist/${artistId}/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/json'
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);  // Show success message
-            document.getElementById(`follow-btn-${artistId}`).style.display = 'none';
-            document.getElementById(`unfollow-btn-${artistId}`).style.display = 'inline-block';
-        } else {
-            alert(data.message);  // Show error message
-        }
-    })
-    .catch(error => console.log('Error:', error));
-}
-
-function unfollowArtist(artistId) {
-    fetch(`/profile/dashboard/artists/unfollow-artist/${artistId}/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/json'
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);  // Show success message
-            document.getElementById(`unfollow-btn-${artistId}`).style.display = 'none';
-            document.getElementById(`follow-btn-${artistId}`).style.display = 'inline-block';
-        } else {
-            alert(data.message);  // Show error message
-        }
-    })
-    .catch(error => console.log('Error:', error));
-}
-</script>  
+    function toggleFollow(artistId, follow,artistName) {
+        fetch(`/artists/${follow ? 'follow' : 'unfollow'}/${artistId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            }
+        }).then(res => res.json())
+          .then(data => {
+              if (data.success) {
+                  if (follow) {
+                      location.reload();  // For follow, reload
+                  } else {
+                      // For unfollow, show message
+                      alert(`You have unfollowed artist ${artistName}`);
+                      document.getElementById(`follow-actions-${artistId}`).innerHTML = `
+                          <button class="btn-follow" onclick="toggleFollow(${artistId}, true)">+ Follow</button>
+                      `;
+                  }
+              } else {
+                  alert(data.message || 'Failed to process follow/unfollow.');
+              }
+          })
+          .catch(err => {
+              console.error('Request failed', err);
+          });
+    }
+</script>
 </body>
 </html>
