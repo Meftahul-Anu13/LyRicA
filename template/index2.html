@@ -203,7 +203,6 @@ p.all{
         </div>
       </div>
 
-
         <div class="now-playing-details">
           <h3>Now Playing</h3>
           <div class="track-details" id="now-playing-details">
@@ -289,7 +288,9 @@ p.all{
               songElement.setAttribute("data-song-title", song.song_title);
               songElement.setAttribute("data-artist-name", song.artist_name);
               songElement.style.backgroundColor = "#fff";  // Set a simple background color directly
-              songElement.style.padding = "15px";
+              songElement.style.padding = "12px";
+              songElement.style.marginBottom = "4px";
+              songElement.style.marginTop = "3px";
               songElement.style.display = "none";
               songElement.offsetHeight; // Force reflow
               songElement.style.display = "flex"; // Or any other valid display style

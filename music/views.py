@@ -202,6 +202,7 @@ def reject_song_request(request, id):
         messages.success(request, "Song request rejected.")
         return redirect('admin_view_song_requests')
 
+
 @login_required
 def upload_song(request):
     if request.method == 'POST':

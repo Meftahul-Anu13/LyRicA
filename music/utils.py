@@ -4,6 +4,7 @@ import requests
 import os
 from django.conf import settings
 
+
 def authenticate():
     """
     Authenticate with pCloud and return an auth token.
