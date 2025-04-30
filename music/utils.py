@@ -3,10 +3,6 @@
 import requests
 import os
 from django.conf import settings
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
-from django.core.files.storage import FileSystemStorage
-
 
 def authenticate():
     """
@@ -21,7 +17,6 @@ def authenticate():
         return auth_data['auth']
     else:
         raise Exception("Failed to authenticate with pCloud: " + auth_data.get('error', 'Unknown error'))
-
 
 def upload_to_pcloud(mp3_file):
     """

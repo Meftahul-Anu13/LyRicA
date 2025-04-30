@@ -1,0 +1,133 @@
+/* General Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f6f8;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Ensures padding and borders are included in element width/height */
+  }
+  
+  /* Navbar Styles */
+  .navbar {
+    background-color: #4c6ef5;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+  }
+  
+  .navbar-left .logo-text {
+    font-size: 24px;
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
+  }
+  
+  /* Upload Song Container */
+  .upload-song-container {
+    max-width: 400px;
+    margin: 100px auto; /* Center the form with space from the top */
+    padding: 20px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Form Elements */
+  h2 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  label {
+    font-weight: bold;
+    color: #555;
+  }
+  
+  input[type="text"],
+  input[type="date"],
+  input[type="file"] {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  input[type="text"]:focus,
+  input[type="date"]:focus,
+  input[type="file"]:focus {
+    border-color: #4c6ef5;
+  }
+  
+  button[type="submit"] {
+    padding: 12px 25px;
+    background-color: #4c6ef5;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #3753c6;
+  }
+  
+  button[type="submit"]:active {
+    background-color: #2d48a3;
+  }
+  
+  /* Back to Dashboard Button */
+  .back-to-dashboard {
+    text-align: center;
+    margin-top: 30px;
+  }
+  
+  .back-to-dashboard .btn {
+    padding: 12px 30px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .back-to-dashboard .btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .back-to-dashboard .btn:active {
+    background-color: #004085;
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 768px) {
+    .upload-song-container {
+      width: 90%; /* Take up more width on smaller screens */
+    }
+  
+    button[type="submit"] {
+      font-size: 1rem;
+    }
+  }
+  

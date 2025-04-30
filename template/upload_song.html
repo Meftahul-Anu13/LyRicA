@@ -1,0 +1,54 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Song</title>
+    <link rel="stylesheet" href="{% static 'upload_song.css' %}">
+</head>
+<body>
+
+<!-- Navbar -->
+<header class="navbar">
+  <div class="navbar-left">
+    <a href="{% url 'index' %}" class="logo-text">LyRicA</a>
+  </div>
+</header>
+
+<!-- Upload Song Form -->
+<div class="upload-song-container">
+    <h2>📤 Upload Song</h2>
+
+    <form method="POST" action="/upload-song/" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="song_title">Song Title:</label>
+        <input type="text" id="song_title" name="song_title" required>
+
+        <label for="artist">Artist:</label>
+        <input type="text" id="artist" name="artist" required>
+
+        <label for="album">Album:</label>
+        <input type="text" id="album" name="album">
+
+        <label for="genre">Genre:</label>
+        <input type="text" id="genre" name="genre">
+
+        <label for="release_date">Release Date:</label>
+        <input type="date" id="release_date" name="release_date" required>
+
+        <label for="mp3_file">MP3 File:</label>
+        <input type="file" id="mp3_file" name="mp3_file" accept="audio/mp3" required>
+
+        <button type="submit">Upload Song</button>
+    </form>
+    {% if request.user.user_type.user_type_name == "Admin" %}
+    <div class="back-to-dashboard">
+        <a href="{% url 'admin_dashboard' %}" class="btn">↩️ Back to Dashboard</a>
+      </div>
+    {% endif %} 
+</div>
+
+</body>
+</html>

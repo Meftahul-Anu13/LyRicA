@@ -87,7 +87,7 @@ urlpatterns = [
     path('song/increment-stream/<int:song_id>/', views.increment_stream, name='increment_stream'),
     path('profile/dashboard/artists/follow-artist/<int:artist_id>/', views.follow_artist, name='follow_artist'),
     path('profile/dashboard/artists/unfollow-artist/<int:artist_id>/', views.unfollow_artist, name='unfollow_artist'),
-
+    path('upload-song/', views.upload_song, name='upload_song'),
     path('followed-artists/', views.followed_artists, name='followed_artists'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

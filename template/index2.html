@@ -155,6 +155,11 @@ p.all{
 {% if request.user.user_type.user_type_name == "Admin" %}
       <a href="{% url 'admin_view_song_requests' %}" class="btn blue-btn" style="text-align: center;">Song Requests</a>
     {% endif %}
+    {% if request.user.user_type.user_type_name == "Artist" %}
+  <div class="upload-song-container">
+    <a href="{% url 'upload_song' %}" class="btn blue-btn">📤 Upload Song</a>
+  </div>
+{% endif %}
     </aside>
 
     <!-- Main Content -->

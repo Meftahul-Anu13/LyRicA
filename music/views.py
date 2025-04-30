@@ -25,7 +25,9 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
-
+from datetime import date
+from tinytag import TinyTag
+from django.db import transaction
 
 # Load environment variables
 load_dotenv()
@@ -199,7 +201,72 @@ def reject_song_request(request, id):
         song_request.save()
         messages.success(request, "Song request rejected.")
         return redirect('admin_view_song_requests')
-    
+
+@login_required
+def upload_song(request):
+    if request.method == 'POST':
+        song_title = request.POST['song_title']
+        artist_name = request.POST['artist']
+        album_name = request.POST['album']
+        genre_name = request.POST['genre']
+        release_date = request.POST['release_date']  # This will be in the format YYYY-MM-DD
+        mp3_file = request.FILES['mp3_file']
+
+        # Parse the release date into a date object
+        try:
+            release_date = date.fromisoformat(release_date)
+        except ValueError:
+            messages.error(request, "Invalid release date.")
+            return redirect('upload_song')
+
+        # Check if the artist exists, if not, create it
+        artist, created = Artist.objects.get_or_create(name=artist_name)
+
+        # Check if the genre exists, if not, create it
+        genre, created = Genre.objects.get_or_create(name=genre_name)
+
+        # Try to get the album based on title and artist
+        album = Album.objects.filter(title=album_name, artist=artist).first()
+
+        if not album:
+            # If the album doesn't exist, create a new one with the release_date
+            album = Album.objects.create(
+                title=album_name,
+                artist=artist,
+                release_date=release_date  # Use the parsed release_date
+            )
+
+        # Handle file saving
+        fs = FileSystemStorage()
+        filename = fs.save(mp3_file.name, mp3_file)
+        file_url = fs.url(filename)
+
+        # Extract the duration of the MP3 file using TinyTag
+        tag = TinyTag.get(f'./media/{filename}')
+        duration = int(tag.duration)  # Get the duration in seconds
+
+        # Get the current logged-in user (admin)
+        admin_user = request.user
+
+        # Create the song entry, with the admin field populated and the duration
+        song = Song.objects.create(
+            title=song_title,
+            album=album,
+            artist=artist,
+            genre=genre,
+            released_year=release_date.year,
+            released_month=release_date.month,
+            released_day=release_date.day,
+            duration=duration,  # Save the duration (in seconds)
+            file_url=file_url,  # Save the file URL
+            admin=admin_user  # Set the admin to the logged-in user
+        )
+
+        messages.success(request, "Song uploaded successfully!")
+        return redirect('song_list')
+
+    return render(request, 'upload_song.html')
+
 # Admin Dashboard View
 @login_required
 def admin_dashboard(request):

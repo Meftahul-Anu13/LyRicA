@@ -1,0 +1,147 @@
+/* General Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f6f8;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Ensure padding doesn't affect width */
+  }
+  
+  /* Navbar Styling */
+  .navbar {
+    background-color: #4c6ef5;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+  }
+  
+  .navbar-left .logo-text {
+    font-size: 24px;
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
+  }
+  
+  /* Profile Edit Container */
+  .profile-container {
+    width: 80%;
+    max-width: 400px;
+    margin: 100px auto 40px; /* Centering the form with space from the top */
+    padding: 20px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Profile Edit Card */
+  .profile-card {
+    padding: 10px;
+  }
+  
+  h2 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  /* Form Styles */
+  .edit-profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  label {
+    font-weight: bold;
+    color: #555;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="date"],
+  select,
+  input[type="password"] {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="date"]:focus,
+  select:focus,
+  input[type="password"]:focus {
+    border-color: #4c6ef5;
+  }
+  
+  /* Button Styles */
+  button[type="submit"] {
+    padding: 12px 25px;
+    background-color: #4c6ef5;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #3753c6;
+  }
+  
+  button[type="submit"]:active {
+    background-color: #2d48a3;
+  }
+  
+  a.btn.logout-btn {
+    padding: 12px 25px;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+  }
+  
+  a.btn.logout-btn:hover {
+    background-color: #c82333;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .profile-container {
+      width: 90%; /* More flexible on mobile screens */
+    }
+  
+    h2 {
+      font-size: 1.8rem;
+    }
+  
+    button[type="submit"] {
+      font-size: 1rem;
+    }
+  }
+  
